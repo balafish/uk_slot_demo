@@ -347,6 +347,33 @@ canvas { display: block; }
   .balance-pill, .jackpot-mini { font-size: 11px; padding: 4px 10px; }
   .building-label .label-name { font-size: 11px; }
   .nav-btn { padding: 5px 10px; }
+  #back-btn { top: 60px; left: 12px; padding: 6px 14px; font-size: 12px; }
+  .zone-header .zone-title { font-size: 16px; }
+  .zone-card .card-name { font-size: 13px; }
+}
+
+@media (max-width: 480px) {
+  #hud-top { padding: 8px 12px; }
+  .hud-logo { font-size: 10px; letter-spacing: 1px; }
+  .hud-center { gap: 8px; }
+  .balance-pill, .jackpot-mini { font-size: 10px; padding: 3px 8px; }
+  .balance-pill .coin { width: 14px; height: 14px; font-size: 7px; }
+  .jackpot-mini .diamond { font-size: 10px; }
+  .avatar-hud { width: 28px; height: 28px; font-size: 13px; }
+  .mission-btn { width: 28px; height: 28px; font-size: 12px; }
+  .hud-right { gap: 8px; }
+  #hud-bottom { padding: 8px 10px; gap: 4px; }
+  .nav-btn { padding: 4px 8px; }
+  .nav-btn .nav-icon { font-size: 16px; }
+  .nav-btn .nav-label { font-size: 8px; }
+  #zone-panel { width: 100%; border-radius: 12px 0 0 12px; padding: 16px; top: 50px; bottom: 60px; }
+  .zone-header .zone-icon { font-size: 26px; }
+  .zone-header .zone-title { font-size: 14px; letter-spacing: 1px; }
+  .zone-card { padding: 12px; margin-bottom: 8px; }
+  .building-label .label-name { font-size: 10px; letter-spacing: 2px; }
+  .building-label .label-sub { font-size: 9px; }
+  #back-btn { top: 54px; left: 8px; padding: 5px 12px; font-size: 11px; }
+  #jackpot-broadcast { font-size: 11px; padding: 8px 18px; }
 }
 
 /* ========================================
@@ -498,7 +525,7 @@ const clock = new THREE.Clock();
 // ============================================================
 const W = window.innerWidth, H = window.innerHeight;
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x050510, 0.018);
+scene.fog = new THREE.FogExp2(0x050510, 0.012);
 
 const camera = new THREE.PerspectiveCamera(55, W / H, 0.1, 500);
 camera.position.set(...CAM_STATES.overview.pos);
@@ -509,7 +536,7 @@ const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
 renderer.setSize(W, H);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.0;
+renderer.toneMappingExposure = 1.4;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
@@ -525,10 +552,14 @@ composer.addPass(bloomPass);
 // ============================================================
 // LIGHTING
 // ============================================================
-const ambientLight = new THREE.AmbientLight(0x0a0a20, 0.6);
+const ambientLight = new THREE.AmbientLight(0x1a1a40, 1.2);
 scene.add(ambientLight);
 
-const moonLight = new THREE.DirectionalLight(0x4466aa, 0.3);
+// Hemisphere light for natural fill (sky blue + ground warm)
+const hemiLight = new THREE.HemisphereLight(0x4466aa, 0x222244, 0.6);
+scene.add(hemiLight);
+
+const moonLight = new THREE.DirectionalLight(0x6688cc, 0.8);
 moonLight.position.set(10, 30, 20);
 moonLight.castShadow = true;
 moonLight.shadow.mapSize.set(1024, 1024);
@@ -545,8 +576,8 @@ scene.add(moonLight);
 // ============================================================
 const groundGeo = new THREE.CircleGeometry(60, 64);
 const groundMat = new THREE.MeshStandardMaterial({
-  color: 0x080818,
-  metalness: 0.8,
+  color: 0x121228,
+  metalness: 0.7,
   roughness: 0.35,
 });
 const ground = new THREE.Mesh(groundGeo, groundMat);
@@ -750,11 +781,11 @@ function createSlotHall() {
   }
 
   // Point lights
-  const light1 = new THREE.PointLight(C.primary, 4, 18);
+  const light1 = new THREE.PointLight(C.primary, 8, 25);
   light1.position.set(0, 4, 6);
   group.add(light1);
 
-  const light2 = new THREE.PointLight(C.secondary, 2, 10);
+  const light2 = new THREE.PointLight(C.secondary, 4, 15);
   light2.position.set(0, 8.5, 0);
   group.add(light2);
 
@@ -763,8 +794,8 @@ function createSlotHall() {
     new THREE.CircleGeometry(6, 32),
     new THREE.MeshStandardMaterial({
       color: C.primary, emissive: C.primary,
-      emissiveIntensity: 0.4, toneMapped: false,
-      transparent: true, opacity: 0.15,
+      emissiveIntensity: 0.6, toneMapped: false,
+      transparent: true, opacity: 0.2,
     })
   );
   glowDisc.rotation.x = -Math.PI / 2;
@@ -846,14 +877,14 @@ function createLiveStage() {
   group.add(spotCone);
 
   // Spot light (actual)
-  const spotLight = new THREE.SpotLight(C.secondary, 8, 20, Math.PI / 6, 0.5, 1);
+  const spotLight = new THREE.SpotLight(C.secondary, 12, 25, Math.PI / 6, 0.5, 1);
   spotLight.position.set(0, 14, 0);
   spotLight.target.position.set(0, 0, 0);
   group.add(spotLight);
   group.add(spotLight.target);
 
   // Point lights
-  const light1 = new THREE.PointLight(C.primary, 3, 15);
+  const light1 = new THREE.PointLight(C.primary, 6, 22);
   light1.position.set(0, 3, 5);
   group.add(light1);
 
@@ -862,8 +893,8 @@ function createLiveStage() {
     new THREE.CircleGeometry(7, 32),
     new THREE.MeshStandardMaterial({
       color: C.primary, emissive: C.primary,
-      emissiveIntensity: 0.3, toneMapped: false,
-      transparent: true, opacity: 0.12,
+      emissiveIntensity: 0.5, toneMapped: false,
+      transparent: true, opacity: 0.18,
     })
   );
   glowDisc.rotation.x = -Math.PI / 2;
@@ -963,11 +994,11 @@ function createFishingHarbor() {
   }
 
   // Lights
-  const cyanLight = new THREE.PointLight(C.primary, 4, 20);
+  const cyanLight = new THREE.PointLight(C.primary, 8, 28);
   cyanLight.position.set(-2.5, 10, -4);
   group.add(cyanLight);
 
-  const greenLight = new THREE.PointLight(C.secondary, 2, 12);
+  const greenLight = new THREE.PointLight(C.secondary, 4, 18);
   greenLight.position.set(0, 3, 0);
   group.add(greenLight);
 
@@ -976,8 +1007,8 @@ function createFishingHarbor() {
     new THREE.CircleGeometry(8, 32),
     new THREE.MeshStandardMaterial({
       color: C.primary, emissive: C.primary,
-      emissiveIntensity: 0.3, toneMapped: false,
-      transparent: true, opacity: 0.1,
+      emissiveIntensity: 0.5, toneMapped: false,
+      transparent: true, opacity: 0.15,
     })
   );
   glowDisc.rotation.x = -Math.PI / 2;
@@ -1091,15 +1122,15 @@ function createJackpotTemple() {
   );
 
   // Lights
-  const goldLight1 = new THREE.PointLight(C.primary, 6, 25);
+  const goldLight1 = new THREE.PointLight(C.primary, 10, 30);
   goldLight1.position.set(0, 14, 0);
   group.add(goldLight1);
 
-  const goldLight2 = new THREE.PointLight(C.primary, 3, 15);
+  const goldLight2 = new THREE.PointLight(C.primary, 5, 20);
   goldLight2.position.set(0, 5, 5);
   group.add(goldLight2);
 
-  const whiteLight = new THREE.PointLight(C.secondary, 2, 12);
+  const whiteLight = new THREE.PointLight(C.secondary, 4, 18);
   whiteLight.position.set(0, 10, 0);
   group.add(whiteLight);
 
@@ -1108,8 +1139,8 @@ function createJackpotTemple() {
     new THREE.CircleGeometry(9, 32),
     new THREE.MeshStandardMaterial({
       color: C.primary, emissive: C.primary,
-      emissiveIntensity: 0.5, toneMapped: false,
-      transparent: true, opacity: 0.15,
+      emissiveIntensity: 0.7, toneMapped: false,
+      transparent: true, opacity: 0.2,
     })
   );
   glowDisc.rotation.x = -Math.PI / 2;
@@ -1421,6 +1452,8 @@ function updateAnimatedElements(time) {
 window.addEventListener('resize', () => {
   const w = window.innerWidth, h = window.innerHeight;
   camera.aspect = w / h;
+  // Widen FOV on portrait screens so buildings stay visible
+  camera.fov = (w < h) ? 70 : 55;
   camera.updateProjectionMatrix();
   renderer.setSize(w, h);
   composer.setSize(w, h);
