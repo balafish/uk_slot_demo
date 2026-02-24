@@ -226,7 +226,7 @@ canvas { display: block; }
   border-radius: 20px 0 0 20px;
   padding: 24px;
   overflow-y: auto;
-  transition: right 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: right 0.5s cubic-bezier(0.4, 0, 0.2, 1), bottom 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 #zone-panel.open { right: 0; }
 #zone-panel::-webkit-scrollbar { width: 4px; }
@@ -340,6 +340,7 @@ canvas { display: block; }
 /* ========================================
    RESPONSIVE
    ======================================== */
+/* --- Tablet (≤768px) --- */
 @media (max-width: 768px) {
   #zone-panel { width: calc(100% - 20px); right: -100%; top: 55px; bottom: 65px; border-radius: 16px 0 0 16px; }
   #zone-panel.open { right: 0; }
@@ -352,28 +353,68 @@ canvas { display: block; }
   .zone-card .card-name { font-size: 13px; }
 }
 
+/* --- iPhone 14 Pro Max baseline (≤480px) --- */
 @media (max-width: 480px) {
-  #hud-top { padding: 8px 12px; }
-  .hud-logo { font-size: 10px; letter-spacing: 1px; }
-  .hud-center { gap: 8px; }
-  .balance-pill, .jackpot-mini { font-size: 10px; padding: 3px 8px; }
+  /* Top HUD: compact single row */
+  #hud-top {
+    padding: 6px 12px;
+    padding-top: env(safe-area-inset-top, 6px);
+  }
+  .hud-logo { font-size: 11px; letter-spacing: 1px; }
+  .hud-center { gap: 6px; }
+  .balance-pill { font-size: 10px; padding: 3px 8px; }
   .balance-pill .coin { width: 14px; height: 14px; font-size: 7px; }
+  .jackpot-mini { font-size: 10px; padding: 3px 8px; }
   .jackpot-mini .diamond { font-size: 10px; }
   .avatar-hud { width: 28px; height: 28px; font-size: 13px; }
   .mission-btn { width: 28px; height: 28px; font-size: 12px; }
-  .hud-right { gap: 8px; }
-  #hud-bottom { padding: 8px 10px; gap: 4px; }
-  .nav-btn { padding: 4px 8px; }
-  .nav-btn .nav-icon { font-size: 16px; }
-  .nav-btn .nav-label { font-size: 8px; }
-  #zone-panel { width: 100%; border-radius: 12px 0 0 12px; padding: 16px; top: 50px; bottom: 60px; }
+  .hud-right { gap: 6px; }
+
+  /* Bottom nav: larger touch targets */
+  #hud-bottom {
+    padding: 8px 8px;
+    padding-bottom: max(8px, env(safe-area-inset-bottom, 8px));
+    gap: 2px;
+  }
+  .nav-btn { padding: 6px 10px; min-width: 54px; }
+  .nav-btn .nav-icon { font-size: 18px; }
+  .nav-btn .nav-label { font-size: 8px; letter-spacing: 0.5px; }
+
+  /* Zone panel: slide up from bottom, half screen */
+  #zone-panel {
+    top: auto;
+    right: 0;
+    left: 0;
+    bottom: -100%;
+    width: 100%;
+    height: 55%;
+    border-radius: 20px 20px 0 0;
+    border-left: none;
+    border-top: 1px solid rgba(255, 215, 0, 0.12);
+    padding: 20px 16px;
+    padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+    transition: bottom 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  #zone-panel.open { right: 0; bottom: 0; }
+
+  .zone-header { margin-bottom: 16px; padding-bottom: 12px; }
   .zone-header .zone-icon { font-size: 26px; }
-  .zone-header .zone-title { font-size: 14px; letter-spacing: 1px; }
-  .zone-card { padding: 12px; margin-bottom: 8px; }
+  .zone-header .zone-title { font-size: 15px; letter-spacing: 1px; }
+  .zone-header .zone-subtitle { font-size: 11px; }
+  .zone-card { padding: 12px; margin-bottom: 8px; border-radius: 10px; }
+  .zone-card .card-name { font-size: 13px; }
+  .zone-card .card-desc { font-size: 11px; }
+
+  /* Building labels */
   .building-label .label-name { font-size: 10px; letter-spacing: 2px; }
   .building-label .label-sub { font-size: 9px; }
-  #back-btn { top: 54px; left: 8px; padding: 5px 12px; font-size: 11px; }
-  #jackpot-broadcast { font-size: 11px; padding: 8px 18px; }
+
+  /* Back button */
+  #back-btn { top: auto; bottom: 58%; left: 50%; transform: translateX(-50%); padding: 6px 18px; font-size: 12px; border-radius: 50px; }
+  #back-btn.visible { opacity: 1; pointer-events: all; }
+
+  /* Broadcast */
+  #jackpot-broadcast { font-size: 10px; padding: 7px 16px; max-width: 90vw; }
 }
 
 /* ========================================
@@ -458,18 +499,18 @@ const COLORS = {
 };
 
 const BUILDING_POS = {
-  slots:   { x: -13, y: 0, z: -2 },
-  live:    { x: 13, y: 0, z: -2 },
-  fishing: { x: -11, y: 0, z: -20 },
-  jackpot: { x: 0, y: 0, z: -26 },
+  slots:   { x: -18, y: 0, z: -5 },
+  live:    { x: 18, y: 0, z: -5 },
+  fishing: { x: -16, y: 0, z: -35 },
+  jackpot: { x: 0, y: 0, z: -45 },
 };
 
 const CAM_STATES = {
-  overview: { pos: [0, 16, 24], target: [0, 1, -8] },
-  slots:   { pos: [-8, 8, 8], target: [-13, 3, -2] },
-  live:    { pos: [8, 8, 8], target: [13, 3, -2] },
-  fishing: { pos: [-5, 7, -12], target: [-11, 2, -20] },
-  jackpot: { pos: [0, 10, -14], target: [0, 4, -26] },
+  overview: { pos: [0, 28, 42], target: [0, 0, -15] },
+  slots:   { pos: [-6, 12, 14], target: [-18, 3, -5] },
+  live:    { pos: [6, 12, 14], target: [18, 3, -5] },
+  fishing: { pos: [-4, 11, -20], target: [-16, 2, -35] },
+  jackpot: { pos: [0, 14, -28], target: [0, 4, -45] },
 };
 
 const ZONE_CONTENT = {
@@ -527,7 +568,7 @@ const W = window.innerWidth, H = window.innerHeight;
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0x0a0a20, 0.008);
 
-const camera = new THREE.PerspectiveCamera(55, W / H, 0.1, 500);
+const camera = new THREE.PerspectiveCamera((W < H) ? 70 : 55, W / H, 0.1, 500);
 camera.position.set(...CAM_STATES.overview.pos);
 const camTarget = new THREE.Vector3(...CAM_STATES.overview.target);
 camera.lookAt(camTarget);
@@ -574,7 +615,7 @@ scene.add(moonLight);
 // ============================================================
 // ENVIRONMENT — Ground
 // ============================================================
-const groundGeo = new THREE.CircleGeometry(60, 64);
+const groundGeo = new THREE.CircleGeometry(100, 64);
 const groundMat = new THREE.MeshStandardMaterial({
   color: 0x1a1a35,
   emissive: 0x080818,
@@ -588,9 +629,9 @@ ground.receiveShadow = true;
 scene.add(ground);
 
 // Ground rings (decorative)
-for (let i = 1; i <= 3; i++) {
+for (let i = 1; i <= 4; i++) {
   const ring = new THREE.Mesh(
-    new THREE.RingGeometry(i * 12 - 0.05, i * 12 + 0.05, 64),
+    new THREE.RingGeometry(i * 15 - 0.05, i * 15 + 0.05, 64),
     new THREE.MeshStandardMaterial({
       color: 0xffd700, emissive: 0xffd700,
       emissiveIntensity: 0.3, toneMapped: false,
@@ -611,7 +652,7 @@ const emblemMat = new THREE.MeshStandardMaterial({
 });
 const emblem = new THREE.Mesh(emblemGeo, emblemMat);
 emblem.rotation.x = -Math.PI / 2;
-emblem.position.set(0, 0.03, -8);
+emblem.position.set(0, 0.03, -15);
 scene.add(emblem);
 
 // ============================================================
@@ -647,9 +688,9 @@ const particleGeo = new THREE.BufferGeometry();
 const particlePos = new Float32Array(particleCount * 3);
 const particleVel = [];
 for (let i = 0; i < particleCount; i++) {
-  particlePos[i * 3] = (Math.random() - 0.5) * 60;
-  particlePos[i * 3 + 1] = Math.random() * 20;
-  particlePos[i * 3 + 2] = (Math.random() - 0.5) * 60;
+  particlePos[i * 3] = (Math.random() - 0.5) * 90;
+  particlePos[i * 3 + 1] = Math.random() * 25;
+  particlePos[i * 3 + 2] = (Math.random() - 0.5) * 100 - 10;
   particleVel.push({
     x: (Math.random() - 0.5) * 0.01,
     y: Math.random() * 0.01 + 0.005,
@@ -671,10 +712,10 @@ function updateParticles() {
     pos[i * 3] += particleVel[i].x;
     pos[i * 3 + 1] += particleVel[i].y;
     pos[i * 3 + 2] += particleVel[i].z;
-    if (pos[i * 3 + 1] > 22) {
-      pos[i * 3] = (Math.random() - 0.5) * 60;
+    if (pos[i * 3 + 1] > 26) {
+      pos[i * 3] = (Math.random() - 0.5) * 90;
       pos[i * 3 + 1] = 0;
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 60;
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 100 - 10;
     }
   }
   particles.geometry.attributes.position.needsUpdate = true;
