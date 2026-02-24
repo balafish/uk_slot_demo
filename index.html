@@ -451,10 +451,10 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 // CONFIG
 // ============================================================
 const COLORS = {
-  slots:   { primary: 0xa855f7, secondary: 0xffd700, ambient: 0x2a0a4a },
-  live:    { primary: 0xff2d55, secondary: 0xffd700, ambient: 0x3a0a1a },
-  fishing: { primary: 0x00d4ff, secondary: 0x00ff88, ambient: 0x0a2a3a },
-  jackpot: { primary: 0xffd700, secondary: 0xffffff, ambient: 0x3a2a0a },
+  slots:   { primary: 0xa855f7, secondary: 0xffd700, ambient: 0x5a2a8a },
+  live:    { primary: 0xff2d55, secondary: 0xffd700, ambient: 0x7a2a3a },
+  fishing: { primary: 0x00d4ff, secondary: 0x00ff88, ambient: 0x1a5a7a },
+  jackpot: { primary: 0xffd700, secondary: 0xffffff, ambient: 0x7a5a1a },
 };
 
 const BUILDING_POS = {
@@ -525,7 +525,7 @@ const clock = new THREE.Clock();
 // ============================================================
 const W = window.innerWidth, H = window.innerHeight;
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x050510, 0.012);
+scene.fog = new THREE.FogExp2(0x0a0a20, 0.008);
 
 const camera = new THREE.PerspectiveCamera(55, W / H, 0.1, 500);
 camera.position.set(...CAM_STATES.overview.pos);
@@ -536,7 +536,7 @@ const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
 renderer.setSize(W, H);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.4;
+renderer.toneMappingExposure = 1.8;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
@@ -545,21 +545,21 @@ document.body.appendChild(renderer.domElement);
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
 const bloomPass = new UnrealBloomPass(
-  new THREE.Vector2(W, H), 0.7, 0.6, 0.3
+  new THREE.Vector2(W, H), 0.5, 0.5, 0.5
 );
 composer.addPass(bloomPass);
 
 // ============================================================
 // LIGHTING
 // ============================================================
-const ambientLight = new THREE.AmbientLight(0x1a1a40, 1.2);
+const ambientLight = new THREE.AmbientLight(0x3344668, 2.5);
 scene.add(ambientLight);
 
 // Hemisphere light for natural fill (sky blue + ground warm)
-const hemiLight = new THREE.HemisphereLight(0x4466aa, 0x222244, 0.6);
+const hemiLight = new THREE.HemisphereLight(0x6688cc, 0x443355, 1.2);
 scene.add(hemiLight);
 
-const moonLight = new THREE.DirectionalLight(0x6688cc, 0.8);
+const moonLight = new THREE.DirectionalLight(0x8899cc, 1.5);
 moonLight.position.set(10, 30, 20);
 moonLight.castShadow = true;
 moonLight.shadow.mapSize.set(1024, 1024);
@@ -576,7 +576,9 @@ scene.add(moonLight);
 // ============================================================
 const groundGeo = new THREE.CircleGeometry(60, 64);
 const groundMat = new THREE.MeshStandardMaterial({
-  color: 0x121228,
+  color: 0x1a1a35,
+  emissive: 0x080818,
+  emissiveIntensity: 0.3,
   metalness: 0.7,
   roughness: 0.35,
 });
@@ -691,7 +693,9 @@ function makeEmissiveMat(color, intensity = 2.5) {
 
 function makeWallMat(color) {
   return new THREE.MeshStandardMaterial({
-    color, metalness: 0.5, roughness: 0.5,
+    color, emissive: color,
+    emissiveIntensity: 0.35,
+    metalness: 0.4, roughness: 0.5,
   });
 }
 
@@ -762,7 +766,7 @@ function createSlotHall() {
   for (const x of [-3, 3]) {
     const pillar = new THREE.Mesh(
       new THREE.CylinderGeometry(0.25, 0.3, 5.5, 8),
-      new THREE.MeshStandardMaterial({ color: 0x1a0a3a, metalness: 0.7, roughness: 0.3 })
+      new THREE.MeshStandardMaterial({ color: 0x4a2a7a, metalness: 0.7, roughness: 0.3, emissive: 0x2a1a5a, emissiveIntensity: 0.2 })
     );
     pillar.position.set(x, 2.75, 3.05);
     pillar.castShadow = true;
@@ -818,7 +822,7 @@ function createLiveStage() {
   // Main stage platform
   const platform = new THREE.Mesh(
     new THREE.CylinderGeometry(5, 5.5, 1.2, 32),
-    new THREE.MeshStandardMaterial({ color: 0x1a0a15, metalness: 0.6, roughness: 0.3 })
+    new THREE.MeshStandardMaterial({ color: 0x4a1a2a, metalness: 0.6, roughness: 0.3, emissive: 0x3a0a1a, emissiveIntensity: 0.25 })
   );
   platform.position.y = 0.6;
   platform.castShadow = true;
@@ -839,7 +843,8 @@ function createLiveStage() {
   const backdrop = new THREE.Mesh(
     backdropGeo,
     new THREE.MeshStandardMaterial({
-      color: 0x2a0a15, metalness: 0.3, roughness: 0.7,
+      color: 0x5a2a35, emissive: 0x3a1a25, emissiveIntensity: 0.2,
+      metalness: 0.3, roughness: 0.7,
       side: THREE.DoubleSide,
     })
   );
@@ -859,7 +864,7 @@ function createLiveStage() {
   // Dealer table (center)
   const table = new THREE.Mesh(
     new THREE.CylinderGeometry(1.5, 1.5, 0.15, 32, 1, false, 0, Math.PI),
-    new THREE.MeshStandardMaterial({ color: 0x0a4a2a, metalness: 0.2, roughness: 0.8 })
+    new THREE.MeshStandardMaterial({ color: 0x1a7a4a, metalness: 0.2, roughness: 0.8, emissive: 0x0a3a1a, emissiveIntensity: 0.2 })
   );
   table.position.set(0, 1.35, 0.5);
   group.add(table);
@@ -917,7 +922,7 @@ function createFishingHarbor() {
   // Pier deck
   const pier = new THREE.Mesh(
     new THREE.BoxGeometry(8, 0.4, 12),
-    new THREE.MeshStandardMaterial({ color: 0x3a2a1a, roughness: 0.9 })
+    new THREE.MeshStandardMaterial({ color: 0x6a4a2a, roughness: 0.9, emissive: 0x3a2a1a, emissiveIntensity: 0.15 })
   );
   pier.position.set(0, 1.5, 0);
   pier.castShadow = true;
@@ -928,7 +933,7 @@ function createFishingHarbor() {
     for (const z of [-4, 0, 4]) {
       const support = new THREE.Mesh(
         new THREE.CylinderGeometry(0.15, 0.2, 1.8, 6),
-        new THREE.MeshStandardMaterial({ color: 0x2a1a0a, roughness: 0.9 })
+        new THREE.MeshStandardMaterial({ color: 0x5a3a1a, roughness: 0.9 })
       );
       support.position.set(x, 0.6, z);
       group.add(support);
@@ -938,7 +943,7 @@ function createFishingHarbor() {
   // Lighthouse tower
   const tower = new THREE.Mesh(
     new THREE.CylinderGeometry(0.8, 1.2, 7, 8),
-    new THREE.MeshStandardMaterial({ color: 0x1a2a3a, metalness: 0.3, roughness: 0.6 })
+    new THREE.MeshStandardMaterial({ color: 0x3a5a7a, metalness: 0.3, roughness: 0.6, emissive: 0x1a3a5a, emissiveIntensity: 0.2 })
   );
   tower.position.set(-2.5, 5.2, -4);
   tower.castShadow = true;
@@ -955,7 +960,7 @@ function createFishingHarbor() {
   // Lighthouse roof
   const roof = new THREE.Mesh(
     new THREE.ConeGeometry(1.1, 1.5, 8),
-    new THREE.MeshStandardMaterial({ color: 0x2a3a4a })
+    new THREE.MeshStandardMaterial({ color: 0x4a6a8a })
   );
   roof.position.set(-2.5, 10.5, -4);
   group.add(roof);
@@ -977,7 +982,7 @@ function createFishingHarbor() {
   // Boat
   const boatHull = new THREE.Mesh(
     new THREE.BoxGeometry(1.5, 0.6, 3),
-    new THREE.MeshStandardMaterial({ color: 0x4a2a1a })
+    new THREE.MeshStandardMaterial({ color: 0x7a4a2a, emissive: 0x3a2a1a, emissiveIntensity: 0.15 })
   );
   boatHull.position.set(3, 0.5, 3);
   boatHull.rotation.y = 0.3;
@@ -1033,7 +1038,8 @@ function createJackpotTemple() {
     const step = new THREE.Mesh(
       new THREE.BoxGeometry(14 - i * 2, 0.5, 8 - i * 0.8),
       new THREE.MeshStandardMaterial({
-        color: 0x1a1a0a, metalness: 0.6, roughness: 0.3,
+        color: 0x4a4a1a, metalness: 0.6, roughness: 0.3,
+        emissive: 0x2a2a0a, emissiveIntensity: 0.2,
       })
     );
     step.position.y = i * 0.5 + 0.25;
@@ -1045,7 +1051,7 @@ function createJackpotTemple() {
   // Main temple floor
   const floor = new THREE.Mesh(
     new THREE.BoxGeometry(10, 0.3, 6),
-    new THREE.MeshStandardMaterial({ color: 0x2a2a1a, metalness: 0.7, roughness: 0.3 })
+    new THREE.MeshStandardMaterial({ color: 0x5a5a2a, metalness: 0.7, roughness: 0.3, emissive: 0x2a2a0a, emissiveIntensity: 0.15 })
   );
   floor.position.y = 2.15;
   group.add(floor);
@@ -1055,7 +1061,7 @@ function createJackpotTemple() {
   for (const [x, z] of colPositions) {
     const col = new THREE.Mesh(
       new THREE.CylinderGeometry(0.3, 0.35, 6, 12),
-      new THREE.MeshStandardMaterial({ color: 0xb8960b, metalness: 0.7, roughness: 0.3 })
+      new THREE.MeshStandardMaterial({ color: 0xd4b030, metalness: 0.7, roughness: 0.3, emissive: 0x806010, emissiveIntensity: 0.2 })
     );
     col.position.set(x, 5.3, z);
     col.castShadow = true;
@@ -1064,7 +1070,7 @@ function createJackpotTemple() {
     // Column cap
     const cap = new THREE.Mesh(
       new THREE.BoxGeometry(0.8, 0.3, 0.8),
-      new THREE.MeshStandardMaterial({ color: 0xd4a537, metalness: 0.8, roughness: 0.2 })
+      new THREE.MeshStandardMaterial({ color: 0xe8c050, metalness: 0.8, roughness: 0.2, emissive: 0x806010, emissiveIntensity: 0.15 })
     );
     cap.position.set(x, 8.4, z);
     group.add(cap);
@@ -1073,7 +1079,7 @@ function createJackpotTemple() {
   // Roof beam
   const beam = new THREE.Mesh(
     new THREE.BoxGeometry(10.5, 0.6, 5.5),
-    new THREE.MeshStandardMaterial({ color: 0x2a2010, metalness: 0.5, roughness: 0.4 })
+    new THREE.MeshStandardMaterial({ color: 0x5a4a20, metalness: 0.5, roughness: 0.4, emissive: 0x2a2010, emissiveIntensity: 0.15 })
   );
   beam.position.y = 8.8;
   group.add(beam);
@@ -1090,7 +1096,7 @@ function createJackpotTemple() {
   pedimentGeo.computeVertexNormals();
   const pediment = new THREE.Mesh(
     pedimentGeo,
-    new THREE.MeshStandardMaterial({ color: 0x2a2010, metalness: 0.5, roughness: 0.5, side: THREE.DoubleSide })
+    new THREE.MeshStandardMaterial({ color: 0x5a4a20, metalness: 0.5, roughness: 0.5, emissive: 0x2a2010, emissiveIntensity: 0.15, side: THREE.DoubleSide })
   );
   group.add(pediment);
 
