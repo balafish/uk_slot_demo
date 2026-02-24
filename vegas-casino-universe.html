@@ -1,0 +1,2756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Las Vegas Casino Universe</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Orbitron:wght@400;500;700;900&family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   🎭 FOUNDATIONS — Color System & Design Tokens
+   ============================================================ */
+:root {
+  /* Primary */
+  --vegas-gold: #D4A537;
+  --vegas-gold-light: #F0D078;
+  --vegas-gold-dark: #A07A1A;
+  --deep-midnight: #0A0E1A;
+  --deep-midnight-blue: #0D1B3E;
+  --velvet-red: #8B1A2B;
+  --velvet-red-glow: #D42A4A;
+  --champagne-glow: #F5E6C8;
+  --champagne-light: #FFF8ED;
+
+  /* Surface */
+  --glass-black: rgba(10, 14, 26, 0.85);
+  --glass-black-solid: #0A0E1A;
+  --marble-grey: #2A2D3A;
+  --marble-grey-light: #3D4155;
+  --neon-accent: #00F0FF;
+  --neon-green: #00FF88;
+  --neon-pink: #FF2D78;
+  --neon-purple: #A855F7;
+
+  /* Elevation & Depth — Shadow Tokens */
+  --shadow-soft: 0 4px 24px rgba(0, 0, 0, 0.4);
+  --shadow-glow-gold: 0 0 40px rgba(212, 165, 55, 0.3), 0 0 80px rgba(212, 165, 55, 0.1);
+  --shadow-glow-neon: 0 0 30px rgba(0, 240, 255, 0.3), 0 0 60px rgba(0, 240, 255, 0.1);
+  --shadow-glow-red: 0 0 30px rgba(212, 42, 74, 0.3);
+  --shadow-glass-blur: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --gold-rim-light: inset 0 1px 0 rgba(212, 165, 55, 0.4), inset 0 -1px 0 rgba(212, 165, 55, 0.1);
+  --gold-rim-full: inset 0 0 0 1px rgba(212, 165, 55, 0.3);
+
+  /* Glass */
+  --glass-bg: rgba(13, 27, 62, 0.5);
+  --glass-border: rgba(212, 165, 55, 0.15);
+  --glass-backdrop: blur(20px);
+
+  /* Typography */
+  --font-display: 'Cinzel', serif;
+  --font-luxury: 'Playfair Display', serif;
+  --font-casino-number: 'Orbitron', sans-serif;
+  --font-casino-alt: 'Bebas Neue', sans-serif;
+  --font-ui: 'DM Sans', sans-serif;
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+  --space-2xl: 64px;
+  --space-3xl: 100px;
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--vegas-gold-dark) var(--deep-midnight);
+}
+
+body {
+  font-family: var(--font-ui);
+  background: var(--deep-midnight);
+  color: var(--champagne-glow);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--deep-midnight); }
+::-webkit-scrollbar-thumb { background: var(--vegas-gold-dark); border-radius: 3px; }
+
+/* ============================================================
+   UTILITY CLASSES
+   ============================================================ */
+.gold-text {
+  background: linear-gradient(135deg, var(--vegas-gold-light), var(--vegas-gold), var(--vegas-gold-dark));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.glow-text {
+  text-shadow: 0 0 20px rgba(212, 165, 55, 0.5), 0 0 40px rgba(212, 165, 55, 0.2);
+}
+
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-backdrop);
+  -webkit-backdrop-filter: var(--glass-backdrop);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+}
+
+/* ============================================================
+   PARTICLE CANVAS (Background)
+   ============================================================ */
+#particle-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ============================================================
+   AMBIENT BACKGROUND
+   ============================================================ */
+.ambient-bg {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(13, 27, 62, 0.8) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(139, 26, 43, 0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 50% 50%, rgba(212, 165, 55, 0.05) 0%, transparent 50%),
+    var(--deep-midnight);
+}
+
+/* ============================================================
+   🪟 HUD — Top Navigation
+   ============================================================ */
+.hud-bar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  background: rgba(10, 14, 26, 0.9);
+  backdrop-filter: blur(30px);
+  border-bottom: 1px solid rgba(212, 165, 55, 0.15);
+}
+
+.hud-left { display: flex; align-items: center; gap: 16px; }
+.hud-right { display: flex; align-items: center; gap: 12px; }
+
+.hud-logo {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+/* Balance Pill */
+.balance-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: linear-gradient(135deg, rgba(212, 165, 55, 0.15), rgba(212, 165, 55, 0.05));
+  border: 1px solid rgba(212, 165, 55, 0.3);
+  border-radius: 50px;
+  font-family: var(--font-casino-number);
+  font-size: 14px;
+  color: var(--vegas-gold-light);
+}
+
+.balance-pill .coin-icon {
+  width: 20px; height: 20px;
+  background: linear-gradient(135deg, var(--vegas-gold-light), var(--vegas-gold-dark));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+  color: var(--deep-midnight);
+  font-weight: 900;
+}
+
+/* Avatar Badge */
+.avatar-badge {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--vegas-gold);
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--marble-grey), var(--deep-midnight-blue));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  position: relative;
+}
+
+.avatar-badge .vip-ring {
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: conic-gradient(var(--vegas-gold), var(--velvet-red-glow), var(--neon-accent), var(--vegas-gold)) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: vipSpin 4s linear infinite;
+}
+
+@keyframes vipSpin { to { transform: rotate(360deg); } }
+
+/* VIP Badge */
+.vip-badge {
+  padding: 3px 10px;
+  background: linear-gradient(135deg, var(--vegas-gold), var(--vegas-gold-dark));
+  border-radius: 4px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--deep-midnight);
+}
+
+/* Jackpot Ticker */
+.jackpot-ticker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: linear-gradient(135deg, rgba(139, 26, 43, 0.3), rgba(212, 42, 74, 0.1));
+  border: 1px solid rgba(212, 42, 74, 0.3);
+  border-radius: 50px;
+  font-family: var(--font-casino-number);
+  font-size: 13px;
+  color: var(--velvet-red-glow);
+  animation: tickerPulse 2s ease-in-out infinite;
+}
+
+@keyframes tickerPulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(212, 42, 74, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(212, 42, 74, 0.4); }
+}
+
+.jackpot-ticker .dot {
+  width: 6px; height: 6px;
+  background: var(--velvet-red-glow);
+  border-radius: 50%;
+  animation: dotBlink 1s ease-in-out infinite;
+}
+
+@keyframes dotBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* Mission Icon */
+.mission-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(0, 240, 255, 0.05));
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s;
+}
+
+.mission-icon:hover {
+  box-shadow: var(--shadow-glow-neon);
+  transform: translateY(-1px);
+}
+
+.mission-icon .notif {
+  position: absolute;
+  top: -3px; right: -3px;
+  width: 14px; height: 14px;
+  background: var(--velvet-red-glow);
+  border-radius: 50%;
+  font-size: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: white;
+  font-weight: 700;
+}
+
+/* ============================================================
+   MAIN CONTENT WRAPPER
+   ============================================================ */
+.main-content {
+  position: relative;
+  z-index: 1;
+  padding-top: 60px;
+}
+
+/* ============================================================
+   🌆 GRAND ENTRANCE — Hero Section
+   ============================================================ */
+.grand-entrance {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-2xl) var(--space-lg);
+  overflow: hidden;
+}
+
+.grand-entrance::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background:
+    conic-gradient(from 0deg at 50% 50%,
+      transparent 0deg, rgba(212, 165, 55, 0.03) 30deg,
+      transparent 60deg, rgba(0, 240, 255, 0.02) 120deg,
+      transparent 180deg, rgba(212, 42, 74, 0.02) 240deg,
+      transparent 300deg, rgba(212, 165, 55, 0.03) 360deg);
+  animation: rotateGlow 30s linear infinite;
+}
+
+@keyframes rotateGlow { to { transform: rotate(360deg); } }
+
+.entrance-content {
+  position: relative;
+  z-index: 2;
+}
+
+.entrance-crown {
+  font-family: var(--font-display);
+  font-size: clamp(10px, 1.2vw, 14px);
+  letter-spacing: 8px;
+  text-transform: uppercase;
+  color: var(--vegas-gold);
+  margin-bottom: var(--space-lg);
+  opacity: 0;
+  animation: fadeUp 1s 0.3s forwards;
+}
+
+.entrance-title {
+  font-family: var(--font-luxury);
+  font-size: clamp(48px, 8vw, 120px);
+  font-weight: 900;
+  line-height: 0.95;
+  margin-bottom: var(--space-lg);
+  opacity: 0;
+  animation: fadeUp 1s 0.5s forwards;
+}
+
+.entrance-title .line1 {
+  display: block;
+  background: linear-gradient(135deg, var(--champagne-light), var(--champagne-glow), var(--vegas-gold-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.entrance-title .line2 {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 0.5em;
+  letter-spacing: 0.15em;
+  background: linear-gradient(135deg, var(--vegas-gold-light), var(--vegas-gold), var(--vegas-gold-dark));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.entrance-sub {
+  font-size: 16px;
+  color: rgba(245, 230, 200, 0.6);
+  letter-spacing: 2px;
+  margin-bottom: var(--space-xl);
+  opacity: 0;
+  animation: fadeUp 1s 0.7s forwards;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Mega Jackpot Counter */
+.mega-jackpot {
+  margin-bottom: var(--space-xl);
+  opacity: 0;
+  animation: fadeUp 1s 0.9s forwards;
+}
+
+.mega-jackpot-label {
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 6px;
+  color: var(--velvet-red-glow);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.mega-jackpot-value {
+  font-family: var(--font-casino-number);
+  font-size: clamp(36px, 6vw, 72px);
+  font-weight: 900;
+  color: var(--vegas-gold-light);
+  text-shadow:
+    0 0 20px rgba(212, 165, 55, 0.6),
+    0 0 40px rgba(212, 165, 55, 0.3),
+    0 0 80px rgba(212, 165, 55, 0.1);
+  letter-spacing: 4px;
+}
+
+.mega-jackpot-value .dollar {
+  font-size: 0.6em;
+  vertical-align: top;
+  margin-right: 4px;
+}
+
+/* Button System */
+.entrance-buttons {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  opacity: 0;
+  animation: fadeUp 1s 1.1s forwards;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  border-radius: 12px;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  transition: left 0.6s;
+}
+
+.btn:hover::after { left: 100%; }
+
+/* Gold CTA */
+.btn-gold {
+  background: linear-gradient(135deg, var(--vegas-gold), var(--vegas-gold-dark));
+  color: var(--deep-midnight);
+  box-shadow: 0 4px 20px rgba(212, 165, 55, 0.3);
+}
+
+.btn-gold:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 40px rgba(212, 165, 55, 0.5);
+}
+
+/* Glass CTA */
+.btn-glass {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--champagne-glow);
+  border: 1px solid rgba(212, 165, 55, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.btn-glass:hover {
+  background: rgba(212, 165, 55, 0.1);
+  border-color: var(--vegas-gold);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-glow-gold);
+}
+
+/* Neon CTA */
+.btn-neon {
+  background: rgba(0, 240, 255, 0.08);
+  color: var(--neon-accent);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+}
+
+.btn-neon:hover {
+  background: rgba(0, 240, 255, 0.15);
+  box-shadow: var(--shadow-glow-neon);
+  transform: translateY(-3px);
+}
+
+/* Spin Button */
+.btn-spin {
+  background: linear-gradient(135deg, var(--velvet-red), var(--velvet-red-glow));
+  color: white;
+  border-radius: 50%;
+  width: 80px; height: 80px;
+  padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-casino-alt);
+  font-size: 18px;
+  letter-spacing: 2px;
+  box-shadow: 0 4px 30px rgba(212, 42, 74, 0.4);
+}
+
+.btn-spin:hover {
+  transform: rotate(15deg) scale(1.1);
+  box-shadow: 0 8px 50px rgba(212, 42, 74, 0.6);
+}
+
+/* ============================================================
+   🌆 LOBBY WORLD LAYOUT — Vegas_Lobby_Main
+   ============================================================ */
+.lobby-section {
+  padding: var(--space-3xl) var(--space-lg);
+  position: relative;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: var(--space-2xl);
+}
+
+.section-crown {
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 6px;
+  color: var(--vegas-gold);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.section-title {
+  font-family: var(--font-luxury);
+  font-size: clamp(32px, 4vw, 56px);
+  font-weight: 900;
+}
+
+.section-divider {
+  width: 80px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--vegas-gold), transparent);
+  margin: 16px auto 0;
+}
+
+/* Area Cards Grid */
+.lobby-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Area Card (Lobby Zones) */
+.area-card {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  aspect-ratio: 16/10;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.area-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(212, 165, 55, 0.4), transparent 50%, rgba(212, 165, 55, 0.1));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.area-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: var(--shadow-glow-gold);
+}
+
+.area-card-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.area-card[data-area="slots"] .area-card-bg {
+  background: linear-gradient(135deg, #1a0a2e, #2d1b69, #0a0e1a);
+}
+.area-card[data-area="live"] .area-card-bg {
+  background: linear-gradient(135deg, #1a2a0a, #0a3a2a, #0a1a0e);
+}
+.area-card[data-area="jackpot"] .area-card-bg {
+  background: linear-gradient(135deg, #3a1a0a, #5a2a0a, #1a0a0a);
+}
+.area-card[data-area="vip"] .area-card-bg {
+  background: linear-gradient(135deg, #2a1a3a, #1a0a3a, #0a0e1a);
+}
+.area-card[data-area="bonus"] .area-card-bg {
+  background: linear-gradient(135deg, #0a2a3a, #0a1a3a, #0a0e2a);
+}
+.area-card[data-area="social"] .area-card-bg {
+  background: linear-gradient(135deg, #2a0a1a, #1a0a2a, #0a0e1a);
+}
+
+.area-card-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, transparent 30%, rgba(10, 14, 26, 0.95) 100%);
+}
+
+.area-card-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%);
+  font-size: 64px;
+  z-index: 1;
+  filter: drop-shadow(0 0 30px rgba(212, 165, 55, 0.3));
+  transition: all 0.5s;
+}
+
+.area-card:hover .area-card-icon {
+  transform: translate(-50%, -70%) scale(1.15);
+}
+
+.area-card-content {
+  position: relative;
+  z-index: 2;
+  padding: 24px;
+}
+
+.area-card-tag {
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--vegas-gold);
+  margin-bottom: 4px;
+}
+
+.area-card-name {
+  font-family: var(--font-luxury);
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: white;
+}
+
+.area-card-desc {
+  font-size: 13px;
+  color: rgba(245, 230, 200, 0.6);
+  line-height: 1.5;
+}
+
+.area-card-players {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--neon-green);
+}
+
+.area-card-players .live-dot {
+  width: 6px; height: 6px;
+  background: var(--neon-green);
+  border-radius: 50%;
+  animation: dotBlink 1.5s ease-in-out infinite;
+}
+
+/* ============================================================
+   🎮 SLOT PALACE — Game Cards
+   ============================================================ */
+.slot-palace {
+  background: linear-gradient(180deg, transparent, rgba(13, 27, 62, 0.3), transparent);
+}
+
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.game-card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  aspect-ratio: 3/4;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  background: linear-gradient(135deg, var(--marble-grey), var(--glass-black-solid));
+  box-shadow: var(--shadow-soft);
+}
+
+.game-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(212, 165, 55, 0.3), transparent 60%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 3;
+  transition: all 0.4s;
+}
+
+.game-card:hover::before {
+  background: linear-gradient(135deg, var(--vegas-gold), rgba(212, 165, 55, 0.5) 50%, transparent);
+}
+
+.game-card:hover {
+  transform: translateY(-10px) scale(1.03);
+  box-shadow: var(--shadow-glow-gold);
+}
+
+.game-card-visual {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 56px;
+  filter: saturate(1.2);
+}
+
+.game-card-gradient {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 60%;
+  background: linear-gradient(180deg, transparent, rgba(10, 14, 26, 0.95));
+  z-index: 1;
+}
+
+.game-card-info {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 16px;
+  z-index: 2;
+}
+
+.game-card-provider {
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--vegas-gold);
+  font-family: var(--font-display);
+  margin-bottom: 4px;
+}
+
+.game-card-title {
+  font-family: var(--font-luxury);
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 8px;
+}
+
+.game-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: rgba(245, 230, 200, 0.5);
+}
+
+.game-card-rtp {
+  padding: 2px 8px;
+  background: rgba(0, 255, 136, 0.1);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  border-radius: 4px;
+  color: var(--neon-green);
+  font-family: var(--font-casino-number);
+  font-size: 10px;
+}
+
+.game-card-hot {
+  padding: 2px 8px;
+  background: rgba(212, 42, 74, 0.15);
+  border: 1px solid rgba(212, 42, 74, 0.3);
+  border-radius: 4px;
+  color: var(--velvet-red-glow);
+  font-size: 10px;
+}
+
+/* Play overlay on hover */
+.game-card-play {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 14, 26, 0.6);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.game-card:hover .game-card-play { opacity: 1; }
+
+.play-circle {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--vegas-gold), var(--vegas-gold-dark));
+  display: flex; align-items: center; justify-content: center;
+  color: var(--deep-midnight);
+  font-size: 24px;
+  box-shadow: 0 0 30px rgba(212, 165, 55, 0.5);
+  transform: scale(0.8);
+  transition: transform 0.3s;
+}
+
+.game-card:hover .play-circle { transform: scale(1); }
+
+/* ============================================================
+   🎭 LIVE THEATER
+   ============================================================ */
+.live-theater {
+  background: linear-gradient(180deg, transparent, rgba(0, 40, 20, 0.1), transparent);
+}
+
+.live-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.live-card {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  aspect-ratio: 16/9;
+  cursor: pointer;
+  transition: all 0.4s;
+  background: var(--marble-grey);
+}
+
+.live-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.3), transparent 50%, rgba(212, 165, 55, 0.2));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.live-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 0 40px rgba(0, 255, 136, 0.2);
+}
+
+.live-card-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+}
+
+.live-card-stage-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #0a2a1a, #1a3a2a, #0a1a0e);
+}
+
+.live-card-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, transparent 40%, rgba(10, 14, 26, 0.9) 100%);
+}
+
+.live-badge {
+  position: absolute;
+  top: 12px; left: 12px;
+  z-index: 4;
+  padding: 4px 10px;
+  background: rgba(212, 42, 74, 0.9);
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.live-badge .pulse {
+  width: 6px; height: 6px;
+  background: white;
+  border-radius: 50%;
+  animation: dotBlink 1s ease-in-out infinite;
+}
+
+.live-card-info {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  z-index: 2;
+  padding: 20px;
+}
+
+.live-card-host {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--neon-green);
+  margin-bottom: 4px;
+}
+
+.live-card-name {
+  font-family: var(--font-luxury);
+  font-size: 22px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 8px;
+}
+
+.live-card-seats {
+  display: flex;
+  gap: 4px;
+}
+
+.seat {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(212, 165, 55, 0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+}
+
+.seat.occupied {
+  background: rgba(212, 165, 55, 0.15);
+  border-color: var(--vegas-gold);
+}
+
+.seat.empty {
+  background: rgba(255, 255, 255, 0.03);
+  border-style: dashed;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.live-bet-range {
+  margin-top: 8px;
+  font-family: var(--font-casino-number);
+  font-size: 11px;
+  color: var(--vegas-gold);
+}
+
+/* ============================================================
+   💰 JACKPOT TEMPLE
+   ============================================================ */
+.jackpot-temple {
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.jackpot-temple::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(212, 165, 55, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.jackpot-shrine {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 48px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(58, 26, 10, 0.3), rgba(10, 14, 26, 0.8));
+  border: 1px solid rgba(212, 165, 55, 0.2);
+  box-shadow: var(--shadow-glow-gold);
+  position: relative;
+}
+
+.jackpot-shrine::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 26px;
+  background: conic-gradient(from 0deg, var(--vegas-gold), transparent 30%, var(--vegas-gold-dark), transparent 60%, var(--vegas-gold));
+  opacity: 0.3;
+  z-index: -1;
+  animation: rotateGlow 8s linear infinite;
+}
+
+.jackpot-statue {
+  font-size: 80px;
+  margin-bottom: 16px;
+  filter: drop-shadow(0 0 40px rgba(212, 165, 55, 0.5));
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.jackpot-mega-label {
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 8px;
+  text-transform: uppercase;
+  color: var(--velvet-red-glow);
+  margin-bottom: 12px;
+}
+
+.jackpot-mega-display {
+  font-family: var(--font-casino-number);
+  font-size: clamp(48px, 8vw, 96px);
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 24px;
+  color: var(--vegas-gold-light);
+  text-shadow:
+    0 0 30px rgba(212, 165, 55, 0.6),
+    0 0 60px rgba(212, 165, 55, 0.3),
+    0 0 120px rgba(212, 165, 55, 0.1);
+  animation: jackpotPulse 2s ease-in-out infinite;
+}
+
+@keyframes jackpotPulse {
+  0%, 100% { text-shadow: 0 0 30px rgba(212, 165, 55, 0.6), 0 0 60px rgba(212, 165, 55, 0.3); }
+  50% { text-shadow: 0 0 40px rgba(212, 165, 55, 0.8), 0 0 80px rgba(212, 165, 55, 0.4), 0 0 120px rgba(212, 165, 55, 0.2); }
+}
+
+.jackpot-tiers {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: 32px;
+}
+
+.jackpot-tier {
+  padding: 16px 24px;
+  border-radius: 12px;
+  background: rgba(10, 14, 26, 0.6);
+  border: 1px solid rgba(212, 165, 55, 0.15);
+  min-width: 160px;
+  transition: all 0.3s;
+}
+
+.jackpot-tier:hover {
+  border-color: var(--vegas-gold);
+  transform: translateY(-4px);
+  box-shadow: 0 0 20px rgba(212, 165, 55, 0.2);
+}
+
+.tier-name {
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.tier-name.gold { color: var(--vegas-gold); }
+.tier-name.silver { color: #C0C0C0; }
+.tier-name.bronze { color: #CD7F32; }
+
+.tier-value {
+  font-family: var(--font-casino-number);
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+}
+
+/* ============================================================
+   🎁 BONUS LOUNGE & REWARDS
+   ============================================================ */
+.bonus-lounge {
+  background: linear-gradient(180deg, transparent, rgba(0, 20, 40, 0.15), transparent);
+}
+
+.bonus-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.bonus-card {
+  position: relative;
+  border-radius: 20px;
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(13, 27, 62, 0.6), rgba(10, 14, 26, 0.8));
+  border: 1px solid rgba(212, 165, 55, 0.15);
+  cursor: pointer;
+  transition: all 0.4s;
+  overflow: hidden;
+}
+
+.bonus-card::after {
+  content: '';
+  position: absolute;
+  top: -50%; right: -50%;
+  width: 100%; height: 100%;
+  background: radial-gradient(circle, rgba(212, 165, 55, 0.06) 0%, transparent 60%);
+  transition: all 0.4s;
+}
+
+.bonus-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--vegas-gold);
+  box-shadow: var(--shadow-glow-gold);
+}
+
+.bonus-card:hover::after { opacity: 1.5; }
+
+.bonus-icon {
+  font-size: 40px;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.bonus-name {
+  font-family: var(--font-luxury);
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.bonus-desc {
+  font-size: 13px;
+  color: rgba(245, 230, 200, 0.6);
+  line-height: 1.5;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.bonus-timer {
+  font-family: var(--font-casino-number);
+  font-size: 12px;
+  color: var(--neon-accent);
+  position: relative;
+  z-index: 1;
+}
+
+.bonus-progress {
+  margin-top: 12px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+.bonus-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--vegas-gold), var(--vegas-gold-light));
+  transition: width 1s ease-out;
+}
+
+/* Mission Card */
+.mission-card {
+  position: relative;
+  border-radius: 16px;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.05), rgba(10, 14, 26, 0.8));
+  border: 1px solid rgba(0, 240, 255, 0.15);
+  transition: all 0.3s;
+}
+
+.mission-card:hover {
+  border-color: var(--neon-accent);
+  box-shadow: var(--shadow-glow-neon);
+  transform: translateY(-4px);
+}
+
+.mission-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.mission-label {
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--neon-accent);
+}
+
+.mission-reward-tag {
+  padding: 3px 10px;
+  background: rgba(212, 165, 55, 0.15);
+  border: 1px solid rgba(212, 165, 55, 0.3);
+  border-radius: 20px;
+  font-family: var(--font-casino-number);
+  font-size: 11px;
+  color: var(--vegas-gold-light);
+}
+
+.mission-title {
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 12px;
+}
+
+.mission-progress-bar {
+  height: 6px;
+  background: rgba(0, 240, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.mission-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--neon-accent), var(--neon-green));
+  border-radius: 3px;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+}
+
+.mission-status {
+  font-size: 12px;
+  color: rgba(245, 230, 200, 0.5);
+}
+
+/* ============================================================
+   👥 SOCIAL CLUB
+   ============================================================ */
+.social-club {
+  background: linear-gradient(180deg, transparent, rgba(40, 10, 30, 0.1), transparent);
+}
+
+.social-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .social-grid { grid-template-columns: 1fr; }
+}
+
+/* Chat Panel */
+.chat-panel {
+  border-radius: 20px;
+  overflow: hidden;
+  background: rgba(10, 14, 26, 0.8);
+  border: 1px solid rgba(212, 165, 55, 0.15);
+}
+
+.chat-header {
+  padding: 16px 20px;
+  background: rgba(212, 165, 55, 0.05);
+  border-bottom: 1px solid rgba(212, 165, 55, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chat-header-title {
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--vegas-gold);
+}
+
+.chat-online {
+  font-size: 12px;
+  color: var(--neon-green);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chat-messages {
+  padding: 16px;
+  max-height: 400px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chat-bubble {
+  display: flex;
+  gap: 10px;
+  max-width: 85%;
+}
+
+.chat-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--marble-grey), var(--deep-midnight-blue));
+  border: 1px solid rgba(212, 165, 55, 0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.chat-body {
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0 12px 12px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.chat-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--vegas-gold);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chat-name .guild-tag {
+  padding: 1px 6px;
+  background: rgba(168, 85, 247, 0.2);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: 3px;
+  font-size: 8px;
+  color: var(--neon-purple);
+  letter-spacing: 1px;
+}
+
+.chat-text {
+  font-size: 13px;
+  color: rgba(245, 230, 200, 0.8);
+  line-height: 1.4;
+}
+
+/* Jackpot Broadcast in Chat */
+.jackpot-broadcast {
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(212, 165, 55, 0.1), rgba(212, 42, 74, 0.05));
+  border: 1px solid rgba(212, 165, 55, 0.25);
+  border-radius: 12px;
+  text-align: center;
+  animation: broadcastGlow 3s ease-in-out infinite;
+}
+
+@keyframes broadcastGlow {
+  0%, 100% { box-shadow: 0 0 10px rgba(212, 165, 55, 0.1); }
+  50% { box-shadow: 0 0 25px rgba(212, 165, 55, 0.25); }
+}
+
+.broadcast-label {
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--velvet-red-glow);
+  margin-bottom: 4px;
+}
+
+.broadcast-text {
+  font-size: 14px;
+  color: var(--vegas-gold-light);
+}
+
+.broadcast-text strong {
+  color: white;
+  font-weight: 700;
+}
+
+.broadcast-amount {
+  font-family: var(--font-casino-number);
+  color: var(--vegas-gold-light);
+  font-weight: 700;
+}
+
+/* Chat Input */
+.chat-input-area {
+  padding: 12px 16px;
+  border-top: 1px solid rgba(212, 165, 55, 0.1);
+  display: flex;
+  gap: 10px;
+}
+
+.chat-input {
+  flex: 1;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50px;
+  color: var(--champagne-glow);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.chat-input:focus {
+  border-color: var(--vegas-gold);
+}
+
+.chat-input::placeholder {
+  color: rgba(245, 230, 200, 0.3);
+}
+
+.chat-send {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--vegas-gold), var(--vegas-gold-dark));
+  border: none;
+  color: var(--deep-midnight);
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-send:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(212, 165, 55, 0.4);
+}
+
+/* Sidebar Panels */
+.social-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Toast / Party Invite */
+.toast-message {
+  padding: 16px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(10, 14, 26, 0.8));
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  animation: toastSlide 0.5s ease-out;
+}
+
+@keyframes toastSlide {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.toast-label {
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--neon-purple);
+  margin-bottom: 8px;
+}
+
+.toast-content {
+  font-size: 14px;
+  color: white;
+  margin-bottom: 12px;
+}
+
+.toast-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.toast-btn {
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s;
+}
+
+.toast-btn.accept {
+  background: linear-gradient(135deg, var(--neon-purple), #7C3AED);
+  color: white;
+}
+
+.toast-btn.decline {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(245, 230, 200, 0.6);
+}
+
+/* Online Friends */
+.friends-panel {
+  padding: 16px;
+  border-radius: 14px;
+  background: rgba(10, 14, 26, 0.6);
+  border: 1px solid rgba(212, 165, 55, 0.1);
+}
+
+.friends-title {
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--vegas-gold);
+  margin-bottom: 16px;
+}
+
+.friend-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.friend-row:last-child { border-bottom: none; }
+
+.friend-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--marble-grey), var(--deep-midnight-blue));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  position: relative;
+}
+
+.friend-status {
+  position: absolute;
+  bottom: -1px; right: -1px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  border: 2px solid var(--deep-midnight);
+}
+
+.friend-status.online { background: var(--neon-green); }
+.friend-status.ingame { background: var(--neon-accent); }
+.friend-status.away { background: var(--vegas-gold); }
+
+.friend-info { flex: 1; }
+
+.friend-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: white;
+}
+
+.friend-activity {
+  font-size: 10px;
+  color: rgba(245, 230, 200, 0.4);
+}
+
+/* Reaction Bubbles */
+.reaction-bubble {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.reaction-bubble:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(212, 165, 55, 0.2);
+  transform: scale(1.1);
+}
+
+.reaction-count {
+  font-size: 11px;
+  color: rgba(245, 230, 200, 0.5);
+}
+
+/* ============================================================
+   🏛 VIP MANSION
+   ============================================================ */
+.vip-mansion {
+  position: relative;
+  overflow: hidden;
+}
+
+.vip-mansion::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 50%, rgba(168, 85, 247, 0.04) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.vip-tiers-row {
+  display: flex;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  overflow-x: auto;
+  padding-bottom: 16px;
+  scroll-snap-type: x mandatory;
+}
+
+.vip-tier-card {
+  flex: 0 0 260px;
+  scroll-snap-align: start;
+  padding: 28px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(10, 14, 26, 0.9), rgba(13, 27, 62, 0.4));
+  border: 1px solid rgba(212, 165, 55, 0.15);
+  text-align: center;
+  transition: all 0.4s;
+  position: relative;
+  overflow: hidden;
+}
+
+.vip-tier-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+
+.vip-tier-card.bronze::before { background: linear-gradient(90deg, transparent, #CD7F32, transparent); }
+.vip-tier-card.silver::before { background: linear-gradient(90deg, transparent, #C0C0C0, transparent); }
+.vip-tier-card.gold::before { background: linear-gradient(90deg, transparent, var(--vegas-gold), transparent); }
+.vip-tier-card.platinum::before { background: linear-gradient(90deg, transparent, #E5E4E2, transparent); }
+.vip-tier-card.diamond::before { background: linear-gradient(90deg, transparent, var(--neon-accent), transparent); }
+
+.vip-tier-card:hover {
+  transform: translateY(-8px);
+  border-color: var(--vegas-gold);
+  box-shadow: var(--shadow-glow-gold);
+}
+
+.vip-tier-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.vip-tier-name {
+  font-family: var(--font-display);
+  font-size: 14px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.vip-tier-card.bronze .vip-tier-name { color: #CD7F32; }
+.vip-tier-card.silver .vip-tier-name { color: #C0C0C0; }
+.vip-tier-card.gold .vip-tier-name { color: var(--vegas-gold); }
+.vip-tier-card.platinum .vip-tier-name { color: #E5E4E2; }
+.vip-tier-card.diamond .vip-tier-name { color: var(--neon-accent); }
+
+.vip-perk {
+  font-size: 13px;
+  color: rgba(245, 230, 200, 0.6);
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.vip-perk:last-child { border-bottom: none; }
+
+/* ============================================================
+   📊 AGGREGATOR UX FLOW
+   ============================================================ */
+.flow-section {
+  text-align: center;
+}
+
+.flow-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.flow-step {
+  padding: 14px 24px;
+  border-radius: 12px;
+  background: rgba(212, 165, 55, 0.05);
+  border: 1px solid rgba(212, 165, 55, 0.2);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--vegas-gold-light);
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.flow-step:hover {
+  background: rgba(212, 165, 55, 0.1);
+  border-color: var(--vegas-gold);
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(212, 165, 55, 0.2);
+}
+
+.flow-step.active {
+  background: linear-gradient(135deg, var(--vegas-gold), var(--vegas-gold-dark));
+  color: var(--deep-midnight);
+  border-color: var(--vegas-gold);
+}
+
+.flow-arrow {
+  color: rgba(212, 165, 55, 0.4);
+  font-size: 20px;
+}
+
+/* ============================================================
+   🏛 AREA DETAIL — Provider Wings
+   ============================================================ */
+.provider-wing {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.provider-row {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  margin-top: var(--space-lg);
+}
+
+.provider-chip {
+  flex: 0 0 auto;
+  padding: 10px 20px;
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(212, 165, 55, 0.15);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--champagne-glow);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.3s;
+}
+
+.provider-chip:hover, .provider-chip.active {
+  background: rgba(212, 165, 55, 0.1);
+  border-color: var(--vegas-gold);
+  color: var(--vegas-gold-light);
+}
+
+/* ============================================================
+   REWARD CHEST
+   ============================================================ */
+.reward-chest {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  flex-wrap: wrap;
+  max-width: 800px;
+  margin: 32px auto 0;
+}
+
+.chest {
+  width: 100px; height: 100px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(212, 165, 55, 0.15), rgba(10, 14, 26, 0.8));
+  border: 1px solid rgba(212, 165, 55, 0.3);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.4s;
+  position: relative;
+}
+
+.chest:hover {
+  transform: scale(1.1) translateY(-4px);
+  box-shadow: var(--shadow-glow-gold);
+  border-color: var(--vegas-gold);
+}
+
+.chest .chest-icon {
+  font-size: 32px;
+  animation: float 2.5s ease-in-out infinite;
+}
+
+.chest .chest-label {
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--vegas-gold);
+  font-family: var(--font-display);
+}
+
+.chest.locked {
+  opacity: 0.4;
+  filter: grayscale(0.5);
+}
+
+.chest.locked:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.footer {
+  text-align: center;
+  padding: var(--space-2xl) var(--space-lg);
+  border-top: 1px solid rgba(212, 165, 55, 0.1);
+  margin-top: var(--space-3xl);
+}
+
+.footer-logo {
+  font-family: var(--font-display);
+  font-size: 14px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.footer-link {
+  font-size: 12px;
+  color: rgba(245, 230, 200, 0.4);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.footer-link:hover { color: var(--vegas-gold); }
+
+.footer-copy {
+  font-size: 11px;
+  color: rgba(245, 230, 200, 0.2);
+}
+
+/* ============================================================
+   COIN PARTICLES
+   ============================================================ */
+.coin-particle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 200;
+  font-size: 20px;
+  animation: coinFall 2s ease-in forwards;
+}
+
+@keyframes coinFall {
+  0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+  100% { opacity: 0; transform: translateY(200px) rotate(720deg) scale(0.3); }
+}
+
+/* ============================================================
+   SCROLL REVEAL
+   ============================================================ */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+  .hud-bar { padding: 10px 14px; }
+  .jackpot-ticker { display: none; }
+  .lobby-grid { grid-template-columns: 1fr; }
+  .game-grid { grid-template-columns: repeat(2, 1fr); }
+  .live-grid { grid-template-columns: 1fr; }
+  .bonus-grid { grid-template-columns: 1fr; }
+  .vip-tiers-row { gap: 12px; }
+  .vip-tier-card { flex: 0 0 220px; }
+  .flow-container { gap: 8px; }
+  .flow-step { padding: 10px 16px; font-size: 12px; }
+  .jackpot-shrine { padding: 24px 16px; }
+}
+
+@media (max-width: 480px) {
+  .game-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .balance-pill { font-size: 12px; padding: 4px 10px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Ambient Background -->
+<div class="ambient-bg"></div>
+<canvas id="particle-canvas"></canvas>
+
+<!-- ============================================================
+     HUD BAR — Top Navigation
+     ============================================================ -->
+<nav class="hud-bar">
+  <div class="hud-left">
+    <div class="hud-logo gold-text">♠ VEGAS UNIVERSE</div>
+    <div class="jackpot-ticker">
+      <span class="dot"></span>
+      <span>MEGA JP: </span>
+      <span id="hudJackpot">$2,847,391</span>
+    </div>
+  </div>
+  <div class="hud-right">
+    <div class="mission-icon" title="Missions">
+      🎯
+      <span class="notif">3</span>
+    </div>
+    <div class="balance-pill">
+      <span class="coin-icon">$</span>
+      <span id="balanceValue">12,450.00</span>
+    </div>
+    <div class="vip-badge">VIP GOLD</div>
+    <div class="avatar-badge">
+      👤
+      <div class="vip-ring"></div>
+    </div>
+  </div>
+</nav>
+
+<!-- ============================================================
+     MAIN CONTENT
+     ============================================================ -->
+<main class="main-content">
+
+  <!-- 🌆 GRAND ENTRANCE -->
+  <section class="grand-entrance" id="entrance">
+    <div class="entrance-content">
+      <p class="entrance-crown">✦ Welcome to the Universe ✦</p>
+      <h1 class="entrance-title">
+        <span class="line1">Las Vegas</span>
+        <span class="line2">Casino Universe</span>
+      </h1>
+      <p class="entrance-sub">Where Fortune Meets Infinity</p>
+
+      <div class="mega-jackpot">
+        <div class="mega-jackpot-label">🔥 Progressive Mega Jackpot</div>
+        <div class="mega-jackpot-value">
+          <span class="dollar">$</span><span id="megaJackpot">4,291,847</span>
+        </div>
+      </div>
+
+      <div class="entrance-buttons">
+        <a href="#lobby" class="btn btn-gold">⚡ Enter Lobby</a>
+        <a href="#slots" class="btn btn-glass">🎰 Slot Palace</a>
+        <a href="#live" class="btn btn-neon">🎭 Live Tables</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 📊 AGGREGATOR FLOW -->
+  <section class="lobby-section flow-section reveal" id="flow">
+    <div class="section-header">
+      <p class="section-crown">Navigation Flow</p>
+      <h2 class="section-title gold-text">Your Journey</h2>
+      <div class="section-divider"></div>
+    </div>
+    <div class="flow-container">
+      <div class="flow-step active">🏠 Lobby</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">🏛 Area</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">🎨 Theme</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">📋 Game List</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">🎮 Play</div>
+    </div>
+  </section>
+
+  <!-- 🌆 LOBBY WORLD — Vegas_Lobby_Main -->
+  <section class="lobby-section reveal" id="lobby">
+    <div class="section-header">
+      <p class="section-crown">Vegas Lobby Main</p>
+      <h2 class="section-title gold-text">The Universe Awaits</h2>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="lobby-grid">
+      <!-- Grand Entrance -->
+      <div class="area-card" data-area="slots" onclick="scrollToSection('slots')">
+        <div class="area-card-bg"></div>
+        <div class="area-card-overlay"></div>
+        <div class="area-card-icon">🎰</div>
+        <div class="area-card-content">
+          <p class="area-card-tag">Area I</p>
+          <h3 class="area-card-name">Slot Palace</h3>
+          <p class="area-card-desc">3,000+ premium slots from top providers</p>
+          <div class="area-card-players"><span class="live-dot"></span> 14,392 playing now</div>
+        </div>
+      </div>
+
+      <!-- Live Theater -->
+      <div class="area-card" data-area="live" onclick="scrollToSection('live')">
+        <div class="area-card-bg"></div>
+        <div class="area-card-overlay"></div>
+        <div class="area-card-icon">🎭</div>
+        <div class="area-card-content">
+          <p class="area-card-tag">Area II</p>
+          <h3 class="area-card-name">Live Theater</h3>
+          <p class="area-card-desc">Real dealers, real tables, real thrills</p>
+          <div class="area-card-players"><span class="live-dot"></span> 5,218 at tables</div>
+        </div>
+      </div>
+
+      <!-- Jackpot Temple -->
+      <div class="area-card" data-area="jackpot" onclick="scrollToSection('jackpot')">
+        <div class="area-card-bg"></div>
+        <div class="area-card-overlay"></div>
+        <div class="area-card-icon">💎</div>
+        <div class="area-card-content">
+          <p class="area-card-tag">Area III</p>
+          <h3 class="area-card-name">Jackpot Temple</h3>
+          <p class="area-card-desc">Progressive jackpots reaching millions</p>
+          <div class="area-card-players"><span class="live-dot"></span> $4.2M+ in pools</div>
+        </div>
+      </div>
+
+      <!-- VIP Mansion -->
+      <div class="area-card" data-area="vip" onclick="scrollToSection('vip')">
+        <div class="area-card-bg"></div>
+        <div class="area-card-overlay"></div>
+        <div class="area-card-icon">👑</div>
+        <div class="area-card-content">
+          <p class="area-card-tag">Area IV</p>
+          <h3 class="area-card-name">VIP Mansion</h3>
+          <p class="area-card-desc">Exclusive high-roller experience</p>
+          <div class="area-card-players"><span class="live-dot"></span> 892 VIP members</div>
+        </div>
+      </div>
+
+      <!-- Bonus Lounge -->
+      <div class="area-card" data-area="bonus" onclick="scrollToSection('bonus')">
+        <div class="area-card-bg"></div>
+        <div class="area-card-overlay"></div>
+        <div class="area-card-icon">🎁</div>
+        <div class="area-card-content">
+          <p class="area-card-tag">Area V</p>
+          <h3 class="area-card-name">Bonus Lounge</h3>
+          <p class="area-card-desc">Daily rewards, missions & free spins</p>
+          <div class="area-card-players"><span class="live-dot"></span> 23 active bonuses</div>
+        </div>
+      </div>
+
+      <!-- Social Club -->
+      <div class="area-card" data-area="social" onclick="scrollToSection('social')">
+        <div class="area-card-bg"></div>
+        <div class="area-card-overlay"></div>
+        <div class="area-card-icon">💬</div>
+        <div class="area-card-content">
+          <p class="area-card-tag">Area VI</p>
+          <h3 class="area-card-name">Social Club</h3>
+          <p class="area-card-desc">Chat, guilds, and community events</p>
+          <div class="area-card-players"><span class="live-dot"></span> 8,741 online</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 🎮 SLOT PALACE -->
+  <section class="lobby-section slot-palace reveal" id="slots">
+    <div class="section-header">
+      <p class="section-crown">Slot Palace</p>
+      <h2 class="section-title gold-text">Premium Slots</h2>
+      <div class="section-divider"></div>
+    </div>
+
+    <!-- Provider Wing -->
+    <div class="provider-wing">
+      <div class="provider-row">
+        <div class="provider-chip active">🔥 Hot Games</div>
+        <div class="provider-chip">Pragmatic Play</div>
+        <div class="provider-chip">NetEnt</div>
+        <div class="provider-chip">Microgaming</div>
+        <div class="provider-chip">Play'n GO</div>
+        <div class="provider-chip">Evolution</div>
+        <div class="provider-chip">Red Tiger</div>
+        <div class="provider-chip">Hacksaw</div>
+        <div class="provider-chip">Push Gaming</div>
+        <div class="provider-chip">Nolimit City</div>
+      </div>
+    </div>
+
+    <div class="game-grid">
+      <div class="game-card">
+        <div class="game-card-visual" style="background: linear-gradient(135deg, #2d1b69, #1a0a2e);">🐺</div>
+        <div class="game-card-gradient"></div>
+        <div class="game-card-info">
+          <p class="game-card-provider">Pragmatic Play</p>
+          <h4 class="game-card-title">Wolf Gold</h4>
+          <div class="game-card-meta">
+            <span class="game-card-rtp">RTP 96.01%</span>
+            <span class="game-card-hot">🔥 HOT</span>
+          </div>
+        </div>
+        <div class="game-card-play"><div class="play-circle">▶</div></div>
+      </div>
+
+      <div class="game-card">
+        <div class="game-card-visual" style="background: linear-gradient(135deg, #0a3a2a, #1a4a1a);">⚡</div>
+        <div class="game-card-gradient"></div>
+        <div class="game-card-info">
+          <p class="game-card-provider">NetEnt</p>
+          <h4 class="game-card-title">Starburst</h4>
+          <div class="game-card-meta">
+            <span class="game-card-rtp">RTP 96.09%</span>
+          </div>
+        </div>
+        <div class="game-card-play"><div class="play-circle">▶</div></div>
+      </div>
+
+      <div class="game-card">
+        <div class="game-card-visual" style="background: linear-gradient(135deg, #3a1a0a, #5a2a0a);">📖</div>
+        <div class="game-card-gradient"></div>
+        <div class="game-card-info">
+          <p class="game-card-provider">Play'n GO</p>
+          <h4 class="game-card-title">Book of Dead</h4>
+          <div class="game-card-meta">
+            <span class="game-card-rtp">RTP 96.21%</span>
+            <span class="game-card-hot">🔥 HOT</span>
+          </div>
+        </div>
+        <div class="game-card-play"><div class="play-circle">▶</div></div>
+      </div>
+
+      <div class="game-card">
+        <div class="game-card-visual" style="background: linear-gradient(135deg, #1a1a3a, #2a0a4a);">🍬</div>
+        <div class="game-card-gradient"></div>
+        <div class="game-card-info">
+          <p class="game-card-provider">Pragmatic Play</p>
+          <h4 class="game-card-title">Sweet Bonanza</h4>
+          <div class="game-card-meta">
+            <span class="game-card-rtp">RTP 96.48%</span>
+          </div>
+        </div>
+        <div class="game-card-play"><div class="play-circle">▶</div></div>
+      </div>
+
+      <div class="game-card">
+        <div class="game-card-visual" style="background: linear-gradient(135deg, #2a1a3a, #4a0a3a);">💀</div>
+        <div class="game-card-gradient"></div>
+        <div class="game-card-info">
+          <p class="game-card-provider">Nolimit City</p>
+          <h4 class="game-card-title">Mental</h4>
+          <div class="game-card-meta">
+            <span class="game-card-rtp">RTP 96.09%</span>
+            <span class="game-card-hot">💥 MAX WIN</span>
+          </div>
+        </div>
+        <div class="game-card-play"><div class="play-circle">▶</div></div>
+      </div>
+
+      <div class="game-card">
+        <div class="game-card-visual" style="background: linear-gradient(135deg, #0a2a3a, #1a3a4a);">⚓</div>
+        <div class="game-card-gradient"></div>
+        <div class="game-card-info">
+          <p class="game-card-provider">Push Gaming</p>
+          <h4 class="game-card-title">Razor Shark</h4>
+          <div class="game-card-meta">
+            <span class="game-card-rtp">RTP 96.70%</span>
+          </div>
+        </div>
+        <div class="game-card-play"><div class="play-circle">▶</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 🎭 LIVE THEATER -->
+  <section class="lobby-section live-theater reveal" id="live">
+    <div class="section-header">
+      <p class="section-crown">Live Theater</p>
+      <h2 class="section-title gold-text">Live Tables</h2>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="live-grid">
+      <div class="live-card">
+        <div class="live-card-stage-bg"></div>
+        <div class="live-card-stage">🃏</div>
+        <div class="live-card-overlay"></div>
+        <div class="live-badge"><span class="pulse"></span> LIVE</div>
+        <div class="live-card-info">
+          <p class="live-card-host">Hosted by Elena</p>
+          <h4 class="live-card-name">Blackjack VIP</h4>
+          <div class="live-card-seats">
+            <div class="seat occupied">👤</div>
+            <div class="seat occupied">👤</div>
+            <div class="seat occupied">👤</div>
+            <div class="seat occupied">👤</div>
+            <div class="seat empty">+</div>
+            <div class="seat empty">+</div>
+            <div class="seat empty">+</div>
+          </div>
+          <div class="live-bet-range">$25 — $10,000</div>
+        </div>
+      </div>
+
+      <div class="live-card">
+        <div class="live-card-stage-bg" style="background: linear-gradient(135deg, #2a0a0a, #3a1a0a, #1a0a0a);"></div>
+        <div class="live-card-stage">🎡</div>
+        <div class="live-card-overlay"></div>
+        <div class="live-badge"><span class="pulse"></span> LIVE</div>
+        <div class="live-card-info">
+          <p class="live-card-host">Hosted by Marco</p>
+          <h4 class="live-card-name">Lightning Roulette</h4>
+          <div class="live-card-seats">
+            <div class="seat occupied">👤</div>
+            <div class="seat occupied">👤</div>
+            <div class="seat occupied">👤</div>
+            <div class="seat occupied">👤</div>
+            <div class="seat occupied">👤</div>
+            <div class="seat occupied">👤</div>
+            <div class="seat occupied">👤</div>
+          </div>
+          <div class="live-bet-range">$1 — $5,000</div>
+        </div>
+      </div>
+
+      <div class="live-card">
+        <div class="live-card-stage-bg" style="background: linear-gradient(135deg, #1a1a2a, #0a0a3a, #0a0e1a);"></div>
+        <div class="live-card-stage">🎴</div>
+        <div class="live-card-overlay"></div>
+        <div class="live-badge"><span class="pulse"></span> LIVE</div>
+        <div class="live-card-info">
+          <p class="live-card-host">Hosted by Sakura</p>
+          <h4 class="live-card-name">Baccarat Squeeze</h4>
+          <div class="live-card-seats">
+            <div class="seat occupied">👤</div>
+            <div class="seat occupied">👤</div>
+            <div class="seat empty">+</div>
+            <div class="seat empty">+</div>
+            <div class="seat empty">+</div>
+          </div>
+          <div class="live-bet-range">$10 — $25,000</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 💰 JACKPOT TEMPLE -->
+  <section class="lobby-section jackpot-temple reveal" id="jackpot">
+    <div class="section-header">
+      <p class="section-crown">Jackpot Temple</p>
+      <h2 class="section-title gold-text">The Shrine of Fortune</h2>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="jackpot-shrine">
+      <div class="jackpot-statue">🏛️</div>
+      <div class="jackpot-mega-label">🔥 MEGA PROGRESSIVE JACKPOT</div>
+      <div class="jackpot-mega-display">
+        $<span id="templeJackpot">4,291,847</span>
+      </div>
+
+      <div class="reward-chest">
+        <div class="chest" onclick="openChest(this)">
+          <span class="chest-icon">🎁</span>
+          <span class="chest-label">Daily</span>
+        </div>
+        <div class="chest" onclick="openChest(this)">
+          <span class="chest-icon">💰</span>
+          <span class="chest-label">Weekly</span>
+        </div>
+        <div class="chest" onclick="openChest(this)">
+          <span class="chest-icon">👑</span>
+          <span class="chest-label">VIP</span>
+        </div>
+        <div class="chest locked">
+          <span class="chest-icon">🔒</span>
+          <span class="chest-label">Mega</span>
+        </div>
+      </div>
+
+      <div class="jackpot-tiers">
+        <div class="jackpot-tier">
+          <div class="tier-name gold">✦ MEGA</div>
+          <div class="tier-value" id="tierMega">$4,291,847</div>
+        </div>
+        <div class="jackpot-tier">
+          <div class="tier-name silver">✦ MAJOR</div>
+          <div class="tier-value" id="tierMajor">$287,412</div>
+        </div>
+        <div class="jackpot-tier">
+          <div class="tier-name bronze">✦ MINOR</div>
+          <div class="tier-value" id="tierMinor">$14,891</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 🎁 BONUS LOUNGE -->
+  <section class="lobby-section bonus-lounge reveal" id="bonus">
+    <div class="section-header">
+      <p class="section-crown">Bonus Lounge</p>
+      <h2 class="section-title gold-text">Rewards & Missions</h2>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="bonus-grid">
+      <div class="bonus-card">
+        <div class="bonus-icon">🎰</div>
+        <h4 class="bonus-name">Welcome Package</h4>
+        <p class="bonus-desc">200% match up to $5,000 + 100 Free Spins on your first deposit</p>
+        <div class="bonus-timer">⏰ Expires in 23:47:12</div>
+        <div class="bonus-progress"><div class="bonus-progress-fill" style="width: 0%"></div></div>
+        <div style="margin-top: 16px;"><button class="btn btn-gold" style="padding: 10px 24px; font-size: 12px;">Claim Now</button></div>
+      </div>
+
+      <div class="bonus-card">
+        <div class="bonus-icon">🎡</div>
+        <h4 class="bonus-name">Daily Spin</h4>
+        <p class="bonus-desc">Spin the wheel every day for free rewards up to $500</p>
+        <div class="bonus-timer">🟢 Available Now</div>
+        <div style="margin-top: 16px;">
+          <button class="btn btn-spin" style="width: 60px; height: 60px; font-size: 14px; margin: 0 auto;">SPIN</button>
+        </div>
+      </div>
+
+      <div class="bonus-card">
+        <div class="bonus-icon">🏆</div>
+        <h4 class="bonus-name">Weekend Tournament</h4>
+        <p class="bonus-desc">$50,000 prize pool — Top 100 players share the reward</p>
+        <div class="bonus-timer">⏰ Starts in 02:15:30</div>
+        <div class="bonus-progress"><div class="bonus-progress-fill" style="width: 72%"></div></div>
+      </div>
+
+      <!-- Mission Cards -->
+      <div class="mission-card">
+        <div class="mission-header">
+          <span class="mission-label">🎯 Daily Mission</span>
+          <span class="mission-reward-tag">+500 🪙</span>
+        </div>
+        <h4 class="mission-title">Win 5 rounds on any Live Table</h4>
+        <div class="mission-progress-bar"><div class="mission-progress-fill" style="width: 60%"></div></div>
+        <p class="mission-status">3 / 5 completed</p>
+      </div>
+
+      <div class="mission-card">
+        <div class="mission-header">
+          <span class="mission-label">🎯 Weekly Mission</span>
+          <span class="mission-reward-tag">+2,000 🪙</span>
+        </div>
+        <h4 class="mission-title">Play 50 slot rounds with $1+ bet</h4>
+        <div class="mission-progress-bar"><div class="mission-progress-fill" style="width: 34%"></div></div>
+        <p class="mission-status">17 / 50 completed</p>
+      </div>
+
+      <div class="mission-card">
+        <div class="mission-header">
+          <span class="mission-label">🎯 Special Event</span>
+          <span class="mission-reward-tag">+5,000 🪙 + 🎁</span>
+        </div>
+        <h4 class="mission-title">Hit a 100x multiplier on any slot</h4>
+        <div class="mission-progress-bar"><div class="mission-progress-fill" style="width: 0%"></div></div>
+        <p class="mission-status">0 / 1 completed</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 🏛 VIP MANSION -->
+  <section class="lobby-section vip-mansion reveal" id="vip">
+    <div class="section-header">
+      <p class="section-crown">VIP Mansion</p>
+      <h2 class="section-title gold-text">Exclusive Privileges</h2>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="vip-tiers-row">
+      <div class="vip-tier-card bronze">
+        <div class="vip-tier-icon">🥉</div>
+        <div class="vip-tier-name">Bronze</div>
+        <div class="vip-perk">5% Cashback</div>
+        <div class="vip-perk">Weekly Bonus</div>
+        <div class="vip-perk">Priority Support</div>
+      </div>
+      <div class="vip-tier-card silver">
+        <div class="vip-tier-icon">🥈</div>
+        <div class="vip-tier-name">Silver</div>
+        <div class="vip-perk">10% Cashback</div>
+        <div class="vip-perk">Daily Bonus</div>
+        <div class="vip-perk">Personal Manager</div>
+        <div class="vip-perk">Higher Limits</div>
+      </div>
+      <div class="vip-tier-card gold">
+        <div class="vip-tier-icon">👑</div>
+        <div class="vip-tier-name">Gold</div>
+        <div class="vip-perk">15% Cashback</div>
+        <div class="vip-perk">Exclusive Tables</div>
+        <div class="vip-perk">Birthday Bonus</div>
+        <div class="vip-perk">Event Access</div>
+        <div class="vip-perk">Custom Avatars</div>
+      </div>
+      <div class="vip-tier-card platinum">
+        <div class="vip-tier-icon">💎</div>
+        <div class="vip-tier-name">Platinum</div>
+        <div class="vip-perk">20% Cashback</div>
+        <div class="vip-perk">Luxury Gifts</div>
+        <div class="vip-perk">Travel Rewards</div>
+        <div class="vip-perk">Private Rooms</div>
+        <div class="vip-perk">Concierge 24/7</div>
+      </div>
+      <div class="vip-tier-card diamond">
+        <div class="vip-tier-icon">♛</div>
+        <div class="vip-tier-name">Diamond</div>
+        <div class="vip-perk">30% Cashback</div>
+        <div class="vip-perk">No Limits</div>
+        <div class="vip-perk">Real-World Events</div>
+        <div class="vip-perk">Custom Everything</div>
+        <div class="vip-perk">Invite-Only</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 💬 SOCIAL CLUB -->
+  <section class="lobby-section social-club reveal" id="social">
+    <div class="section-header">
+      <p class="section-crown">Social Club</p>
+      <h2 class="section-title gold-text">Community</h2>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="social-grid">
+      <!-- Chat Panel -->
+      <div class="chat-panel">
+        <div class="chat-header">
+          <span class="chat-header-title">💬 Global Lobby Chat</span>
+          <span class="chat-online"><span class="live-dot" style="width:6px;height:6px;background:var(--neon-green);border-radius:50%;display:inline-block;animation:dotBlink 1.5s ease-in-out infinite;"></span> 8,741 Online</span>
+        </div>
+        <div class="chat-messages">
+          <div class="chat-bubble">
+            <div class="chat-avatar">🦁</div>
+            <div class="chat-body">
+              <div class="chat-name">LionKing88 <span class="guild-tag">ROYALS</span></div>
+              <div class="chat-text">Just hit 500x on Sweet Bonanza! 🎉🎉</div>
+              <div style="margin-top: 6px; display: flex; gap: 6px;">
+                <span class="reaction-bubble">🔥 <span class="reaction-count">24</span></span>
+                <span class="reaction-bubble">😱 <span class="reaction-count">12</span></span>
+                <span class="reaction-bubble">👏 <span class="reaction-count">8</span></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="jackpot-broadcast">
+            <div class="broadcast-label">🏆 Jackpot Winner</div>
+            <div class="broadcast-text"><strong>PokerAce_99</strong> just won <span class="broadcast-amount">$47,291</span> on Mega Moolah!</div>
+          </div>
+
+          <div class="chat-bubble">
+            <div class="chat-avatar">🐉</div>
+            <div class="chat-body">
+              <div class="chat-name">DragonSlayer <span class="guild-tag">ACES</span></div>
+              <div class="chat-text">Anyone for a Blackjack party? Need 2 more players 🃏</div>
+            </div>
+          </div>
+
+          <div class="chat-bubble">
+            <div class="chat-avatar">🌸</div>
+            <div class="chat-body">
+              <div class="chat-name">SakuraWin</div>
+              <div class="chat-text">The new Lightning Roulette table is amazing!</div>
+            </div>
+          </div>
+
+          <div class="jackpot-broadcast">
+            <div class="broadcast-label">🎉 Big Win</div>
+            <div class="broadcast-text"><strong>GoldRush777</strong> scored <span class="broadcast-amount">$12,847</span> on Book of Dead!</div>
+          </div>
+
+          <div class="chat-bubble">
+            <div class="chat-avatar">🎲</div>
+            <div class="chat-body">
+              <div class="chat-name">DiceKing <span class="guild-tag">WHALES</span></div>
+              <div class="chat-text">GG everyone, great tournament tonight! See you all tomorrow 🏆</div>
+            </div>
+          </div>
+        </div>
+        <div class="chat-input-area">
+          <input class="chat-input" placeholder="Type a message..." />
+          <button class="chat-send">➤</button>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="social-sidebar">
+        <!-- Party Invite -->
+        <div class="toast-message">
+          <div class="toast-label">🎉 Party Invite</div>
+          <div class="toast-content">DragonSlayer invited you to <strong>Blackjack VIP Table #3</strong></div>
+          <div class="toast-actions">
+            <button class="toast-btn accept">Join Party</button>
+            <button class="toast-btn decline">Decline</button>
+          </div>
+        </div>
+
+        <!-- Friends Panel -->
+        <div class="friends-panel">
+          <div class="friends-title">👥 Friends Online</div>
+
+          <div class="friend-row">
+            <div class="friend-avatar">🦁<div class="friend-status online"></div></div>
+            <div class="friend-info">
+              <div class="friend-name">LionKing88</div>
+              <div class="friend-activity">Playing Sweet Bonanza</div>
+            </div>
+          </div>
+
+          <div class="friend-row">
+            <div class="friend-avatar">🐉<div class="friend-status ingame"></div></div>
+            <div class="friend-info">
+              <div class="friend-name">DragonSlayer</div>
+              <div class="friend-activity">In Blackjack VIP</div>
+            </div>
+          </div>
+
+          <div class="friend-row">
+            <div class="friend-avatar">🌸<div class="friend-status online"></div></div>
+            <div class="friend-info">
+              <div class="friend-name">SakuraWin</div>
+              <div class="friend-activity">Browsing Lobby</div>
+            </div>
+          </div>
+
+          <div class="friend-row">
+            <div class="friend-avatar">🎯<div class="friend-status away"></div></div>
+            <div class="friend-info">
+              <div class="friend-name">AceHunter</div>
+              <div class="friend-activity">Away · 15 min</div>
+            </div>
+          </div>
+
+          <div class="friend-row">
+            <div class="friend-avatar">💫<div class="friend-status ingame"></div></div>
+            <div class="friend-info">
+              <div class="friend-name">StarBurst_Pro</div>
+              <div class="friend-activity">In Roulette</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-logo gold-text">♠ Las Vegas Casino Universe ♠</div>
+    <div class="footer-links">
+      <a class="footer-link" href="#">Terms of Service</a>
+      <a class="footer-link" href="#">Privacy Policy</a>
+      <a class="footer-link" href="#">Responsible Gaming</a>
+      <a class="footer-link" href="#">Contact</a>
+      <a class="footer-link" href="#">FAQ</a>
+    </div>
+    <p class="footer-copy">© 2026 Las Vegas Casino Universe. For entertainment purposes only. 18+</p>
+  </footer>
+
+</main>
+
+<script>
+// ============================================================
+// PARTICLE SYSTEM
+// ============================================================
+const canvas = document.getElementById('particle-canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+class Particle {
+  constructor() {
+    this.reset();
+  }
+  reset() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.size = Math.random() * 2 + 0.5;
+    this.speedX = (Math.random() - 0.5) * 0.3;
+    this.speedY = (Math.random() - 0.5) * 0.3;
+    this.opacity = Math.random() * 0.4 + 0.1;
+    this.color = Math.random() > 0.7 ? '#D4A537' : Math.random() > 0.5 ? '#00F0FF' : '#F5E6C8';
+  }
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+    if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
+  }
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fillStyle = this.color;
+    ctx.globalAlpha = this.opacity;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+}
+
+for (let i = 0; i < 80; i++) particles.push(new Particle());
+
+function animateParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p => { p.update(); p.draw(); });
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+// ============================================================
+// JACKPOT COUNTER — Incrementing numbers
+// ============================================================
+let jackpotBase = 4291847;
+let majorBase = 287412;
+let minorBase = 14891;
+
+function updateJackpots() {
+  jackpotBase += Math.floor(Math.random() * 30) + 5;
+  majorBase += Math.floor(Math.random() * 10) + 1;
+  minorBase += Math.floor(Math.random() * 5) + 1;
+
+  const fmt = n => n.toLocaleString();
+  document.getElementById('megaJackpot').textContent = fmt(jackpotBase);
+  document.getElementById('templeJackpot').textContent = fmt(jackpotBase);
+  document.getElementById('hudJackpot').textContent = '$' + fmt(jackpotBase);
+  document.getElementById('tierMega').textContent = '$' + fmt(jackpotBase);
+  document.getElementById('tierMajor').textContent = '$' + fmt(majorBase);
+  document.getElementById('tierMinor').textContent = '$' + fmt(minorBase);
+}
+
+setInterval(updateJackpots, 1500);
+
+// ============================================================
+// SCROLL REVEAL
+// ============================================================
+const revealElements = document.querySelectorAll('.reveal');
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 100);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+revealElements.forEach(el => observer.observe(el));
+
+// ============================================================
+// SMOOTH SCROLL
+// ============================================================
+function scrollToSection(id) {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ============================================================
+// COIN PARTICLES on Chest Open
+// ============================================================
+function openChest(el) {
+  if (el.classList.contains('locked')) return;
+  el.style.transform = 'scale(1.3)';
+  setTimeout(() => { el.style.transform = ''; }, 300);
+
+  // Spawn coins
+  const rect = el.getBoundingClientRect();
+  for (let i = 0; i < 8; i++) {
+    const coin = document.createElement('div');
+    coin.className = 'coin-particle';
+    coin.textContent = '🪙';
+    coin.style.left = (rect.left + rect.width / 2 + (Math.random() - 0.5) * 60) + 'px';
+    coin.style.top = (rect.top - 10) + 'px';
+    coin.style.animationDuration = (1.5 + Math.random()) + 's';
+    document.body.appendChild(coin);
+    setTimeout(() => coin.remove(), 2500);
+  }
+}
+
+// ============================================================
+// PROVIDER CHIP TOGGLE
+// ============================================================
+document.querySelectorAll('.provider-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.provider-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+  });
+});
+
+// ============================================================
+// FLOW STEP INTERACTION
+// ============================================================
+document.querySelectorAll('.flow-step').forEach(step => {
+  step.addEventListener('click', () => {
+    document.querySelectorAll('.flow-step').forEach(s => s.classList.remove('active'));
+    step.classList.add('active');
+  });
+});
+
+// ============================================================
+// BALANCE ANIMATION
+// ============================================================
+let balance = 12450;
+setInterval(() => {
+  const change = (Math.random() - 0.4) * 10;
+  balance = Math.max(0, balance + change);
+  document.getElementById('balanceValue').textContent = balance.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}, 3000);
+</script>
+</body>
+</html>
