@@ -506,11 +506,11 @@ const BUILDING_POS = {
 };
 
 const CAM_STATES = {
-  overview: { pos: [0, 28, 42], target: [0, 0, -15] },
-  slots:   { pos: [-6, 12, 14], target: [-18, 3, -5] },
-  live:    { pos: [6, 12, 14], target: [18, 3, -5] },
-  fishing: { pos: [-4, 11, -20], target: [-16, 2, -35] },
-  jackpot: { pos: [0, 14, -28], target: [0, 4, -45] },
+  overview: { pos: [0, 18, 32], target: [0, 4, -18] },
+  slots:   { pos: [-6, 10, 10], target: [-18, 4, -5] },
+  live:    { pos: [6, 10, 10], target: [18, 4, -5] },
+  fishing: { pos: [-4, 9, -18], target: [-16, 3, -35] },
+  jackpot: { pos: [0, 12, -26], target: [0, 5, -45] },
 };
 
 const ZONE_CONTENT = {
@@ -577,7 +577,7 @@ const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
 renderer.setSize(W, H);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.8;
+renderer.toneMappingExposure = 2.0;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
@@ -593,7 +593,7 @@ composer.addPass(bloomPass);
 // ============================================================
 // LIGHTING
 // ============================================================
-const ambientLight = new THREE.AmbientLight(0x3344668, 2.5);
+const ambientLight = new THREE.AmbientLight(0x334466, 3.0);
 scene.add(ambientLight);
 
 // Hemisphere light for natural fill (sky blue + ground warm)
@@ -605,11 +605,11 @@ moonLight.position.set(10, 30, 20);
 moonLight.castShadow = true;
 moonLight.shadow.mapSize.set(1024, 1024);
 moonLight.shadow.camera.near = 1;
-moonLight.shadow.camera.far = 80;
-moonLight.shadow.camera.left = -30;
-moonLight.shadow.camera.right = 30;
-moonLight.shadow.camera.top = 30;
-moonLight.shadow.camera.bottom = -30;
+moonLight.shadow.camera.far = 120;
+moonLight.shadow.camera.left = -50;
+moonLight.shadow.camera.right = 50;
+moonLight.shadow.camera.top = 50;
+moonLight.shadow.camera.bottom = -60;
 scene.add(moonLight);
 
 // ============================================================
@@ -617,11 +617,11 @@ scene.add(moonLight);
 // ============================================================
 const groundGeo = new THREE.CircleGeometry(100, 64);
 const groundMat = new THREE.MeshStandardMaterial({
-  color: 0x1a1a35,
-  emissive: 0x080818,
-  emissiveIntensity: 0.3,
-  metalness: 0.7,
-  roughness: 0.35,
+  color: 0x22223a,
+  emissive: 0x0e0e22,
+  emissiveIntensity: 0.5,
+  metalness: 0.6,
+  roughness: 0.4,
 });
 const ground = new THREE.Mesh(groundGeo, groundMat);
 ground.rotation.x = -Math.PI / 2;
@@ -634,8 +634,8 @@ for (let i = 1; i <= 4; i++) {
     new THREE.RingGeometry(i * 15 - 0.05, i * 15 + 0.05, 64),
     new THREE.MeshStandardMaterial({
       color: 0xffd700, emissive: 0xffd700,
-      emissiveIntensity: 0.3, toneMapped: false,
-      transparent: true, opacity: 0.15,
+      emissiveIntensity: 0.6, toneMapped: false,
+      transparent: true, opacity: 0.25,
     })
   );
   ring.rotation.x = -Math.PI / 2;
@@ -644,16 +644,69 @@ for (let i = 1; i <= 4; i++) {
 }
 
 // Center emblem
-const emblemGeo = new THREE.RingGeometry(1.5, 2, 6);
+const emblemGeo = new THREE.RingGeometry(2, 2.8, 6);
 const emblemMat = new THREE.MeshStandardMaterial({
   color: 0xffd700, emissive: 0xffd700,
-  emissiveIntensity: 0.8, toneMapped: false,
-  transparent: true, opacity: 0.4,
+  emissiveIntensity: 1.5, toneMapped: false,
+  transparent: true, opacity: 0.5,
 });
 const emblem = new THREE.Mesh(emblemGeo, emblemMat);
 emblem.rotation.x = -Math.PI / 2;
 emblem.position.set(0, 0.03, -15);
 scene.add(emblem);
+
+// ============================================================
+// ENVIRONMENT — Glowing Ground Paths (connect buildings)
+// ============================================================
+const pathMat = new THREE.MeshStandardMaterial({
+  color: 0xffd700, emissive: 0xffd700,
+  emissiveIntensity: 0.6, toneMapped: false,
+  transparent: true, opacity: 0.12,
+});
+
+function createPath(from, to) {
+  const dx = to.x - from.x, dz = to.z - from.z;
+  const len = Math.sqrt(dx * dx + dz * dz);
+  const angle = Math.atan2(dx, dz);
+  const pathGeo = new THREE.PlaneGeometry(0.4, len);
+  const path = new THREE.Mesh(pathGeo, pathMat);
+  path.rotation.x = -Math.PI / 2;
+  path.rotation.z = -angle;
+  path.position.set((from.x + to.x) / 2, 0.04, (from.z + to.z) / 2);
+  scene.add(path);
+}
+
+// Center hub point
+const hub = { x: 0, z: -18 };
+createPath(hub, BUILDING_POS.slots);
+createPath(hub, BUILDING_POS.live);
+createPath(hub, BUILDING_POS.fishing);
+createPath(hub, BUILDING_POS.jackpot);
+
+// Ground uplights along paths
+const uplightPositions = [
+  { x: -6, z: -9 }, { x: -12, z: -7 },   // towards slots
+  { x: 6, z: -9 }, { x: 12, z: -7 },       // towards live
+  { x: -6, z: -22 }, { x: -10, z: -27 },   // towards fishing
+  { x: 0, z: -26 }, { x: 0, z: -35 },       // towards jackpot
+];
+for (const p of uplightPositions) {
+  const uplight = new THREE.PointLight(0xffd700, 2, 12);
+  uplight.position.set(p.x, 0.5, p.z);
+  scene.add(uplight);
+  // Small glowing dot on ground
+  const dot = new THREE.Mesh(
+    new THREE.CircleGeometry(0.3, 16),
+    new THREE.MeshStandardMaterial({
+      color: 0xffd700, emissive: 0xffd700,
+      emissiveIntensity: 1.5, toneMapped: false,
+      transparent: true, opacity: 0.4,
+    })
+  );
+  dot.rotation.x = -Math.PI / 2;
+  dot.position.set(p.x, 0.03, p.z);
+  scene.add(dot);
+}
 
 // ============================================================
 // ENVIRONMENT — Starfield
@@ -735,8 +788,8 @@ function makeEmissiveMat(color, intensity = 2.5) {
 function makeWallMat(color) {
   return new THREE.MeshStandardMaterial({
     color, emissive: color,
-    emissiveIntensity: 0.35,
-    metalness: 0.4, roughness: 0.5,
+    emissiveIntensity: 0.6,
+    metalness: 0.3, roughness: 0.5,
   });
 }
 
@@ -836,11 +889,11 @@ function createSlotHall() {
 
   // Ground glow disc
   const glowDisc = new THREE.Mesh(
-    new THREE.CircleGeometry(6, 32),
+    new THREE.CircleGeometry(10, 32),
     new THREE.MeshStandardMaterial({
       color: C.primary, emissive: C.primary,
-      emissiveIntensity: 0.6, toneMapped: false,
-      transparent: true, opacity: 0.2,
+      emissiveIntensity: 1.0, toneMapped: false,
+      transparent: true, opacity: 0.3,
     })
   );
   glowDisc.rotation.x = -Math.PI / 2;
@@ -936,11 +989,11 @@ function createLiveStage() {
 
   // Ground glow
   const glowDisc = new THREE.Mesh(
-    new THREE.CircleGeometry(7, 32),
+    new THREE.CircleGeometry(10, 32),
     new THREE.MeshStandardMaterial({
       color: C.primary, emissive: C.primary,
-      emissiveIntensity: 0.5, toneMapped: false,
-      transparent: true, opacity: 0.18,
+      emissiveIntensity: 0.8, toneMapped: false,
+      transparent: true, opacity: 0.3,
     })
   );
   glowDisc.rotation.x = -Math.PI / 2;
@@ -1050,11 +1103,11 @@ function createFishingHarbor() {
 
   // Ground glow
   const glowDisc = new THREE.Mesh(
-    new THREE.CircleGeometry(8, 32),
+    new THREE.CircleGeometry(12, 32),
     new THREE.MeshStandardMaterial({
       color: C.primary, emissive: C.primary,
-      emissiveIntensity: 0.5, toneMapped: false,
-      transparent: true, opacity: 0.15,
+      emissiveIntensity: 0.8, toneMapped: false,
+      transparent: true, opacity: 0.25,
     })
   );
   glowDisc.rotation.x = -Math.PI / 2;
@@ -1183,11 +1236,11 @@ function createJackpotTemple() {
 
   // Ground glow
   const glowDisc = new THREE.Mesh(
-    new THREE.CircleGeometry(9, 32),
+    new THREE.CircleGeometry(12, 32),
     new THREE.MeshStandardMaterial({
       color: C.primary, emissive: C.primary,
-      emissiveIntensity: 0.7, toneMapped: false,
-      transparent: true, opacity: 0.2,
+      emissiveIntensity: 1.0, toneMapped: false,
+      transparent: true, opacity: 0.3,
     })
   );
   glowDisc.rotation.x = -Math.PI / 2;
