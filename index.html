@@ -376,9 +376,9 @@ canvas { display: block; }
     padding-bottom: max(8px, env(safe-area-inset-bottom, 8px));
     gap: 2px;
   }
-  .nav-btn { padding: 6px 10px; min-width: 54px; }
-  .nav-btn .nav-icon { font-size: 18px; }
-  .nav-btn .nav-label { font-size: 8px; letter-spacing: 0.5px; }
+  .nav-btn { padding: 5px 6px; min-width: 46px; }
+  .nav-btn .nav-icon { font-size: 17px; }
+  .nav-btn .nav-label { font-size: 7px; letter-spacing: 0.3px; }
 
   /* Zone panel: slide up from bottom, half screen */
   #zone-panel {
@@ -458,6 +458,7 @@ canvas { display: block; }
   <div class="nav-btn" data-zone="slots"><span class="nav-icon">🎰</span><span class="nav-label">Slots</span></div>
   <div class="nav-btn" data-zone="live"><span class="nav-icon">🎭</span><span class="nav-label">Live</span></div>
   <div class="nav-btn" data-zone="fishing"><span class="nav-icon">🐟</span><span class="nav-label">Fish</span></div>
+  <div class="nav-btn" data-zone="sports"><span class="nav-icon">⚽</span><span class="nav-label">Sports</span></div>
   <div class="nav-btn" data-zone="jackpot"><span class="nav-icon">💎</span><span class="nav-label">Jackpot</span></div>
 </div>
 
@@ -495,6 +496,7 @@ const COLORS = {
   slots:   { primary: 0xa855f7, secondary: 0xffd700, ambient: 0x5a2a8a },
   live:    { primary: 0xff2d55, secondary: 0xffd700, ambient: 0x7a2a3a },
   fishing: { primary: 0x00d4ff, secondary: 0x00ff88, ambient: 0x1a5a7a },
+  sports:  { primary: 0x22cc55, secondary: 0xff8800, ambient: 0x1a5a2a },
   jackpot: { primary: 0xffd700, secondary: 0xffffff, ambient: 0x7a5a1a },
 };
 
@@ -502,6 +504,7 @@ const BUILDING_POS = {
   slots:   { x: -18, y: 0, z: -5 },
   live:    { x: 18, y: 0, z: -5 },
   fishing: { x: -16, y: 0, z: -35 },
+  sports:  { x: 16, y: 0, z: -35 },
   jackpot: { x: 0, y: 0, z: -45 },
 };
 
@@ -510,6 +513,7 @@ const CAM_STATES = {
   slots:   { pos: [-6, 10, 10], target: [-18, 4, -5] },
   live:    { pos: [6, 10, 10], target: [18, 4, -5] },
   fishing: { pos: [-4, 9, -18], target: [-16, 3, -35] },
+  sports:  { pos: [4, 9, -18], target: [16, 3, -35] },
   jackpot: { pos: [0, 12, -26], target: [0, 5, -45] },
 };
 
@@ -539,6 +543,15 @@ const ZONE_CONTENT = {
       { name: 'Ocean King', badge: 'HOT', hot: true, desc: 'Underwater boss battles' },
       { name: 'Golden Toad', badge: 'NEW', hot: false, desc: 'Legendary treasure fishing' },
       { name: 'Dragon Hunter', badge: 'TOP', hot: true, desc: 'Sea dragon epic battles' },
+    ]
+  },
+  sports: {
+    icon: '⚽', title: 'SPORTS ARENA', subtitle: 'Bet on Champions',
+    cards: [
+      { name: 'Premier League', badge: 'LIVE', hot: true, desc: 'In-play football betting with live odds' },
+      { name: 'NBA Finals', badge: 'HOT', hot: true, desc: 'Basketball point spreads & totals' },
+      { name: 'Horse Racing', badge: 'CLASSIC', hot: false, desc: 'Daily races with each-way bets' },
+      { name: 'UFC Fight Night', badge: 'NEW', hot: false, desc: 'MMA prop bets & round betting' },
     ]
   },
   jackpot: {
@@ -681,14 +694,16 @@ const hub = { x: 0, z: -18 };
 createPath(hub, BUILDING_POS.slots);
 createPath(hub, BUILDING_POS.live);
 createPath(hub, BUILDING_POS.fishing);
+createPath(hub, BUILDING_POS.sports);
 createPath(hub, BUILDING_POS.jackpot);
 
 // Ground uplights along paths
 const uplightPositions = [
-  { x: -6, z: -9 }, { x: -12, z: -7 },   // towards slots
+  { x: -6, z: -9 }, { x: -12, z: -7 },     // towards slots
   { x: 6, z: -9 }, { x: 12, z: -7 },       // towards live
   { x: -6, z: -22 }, { x: -10, z: -27 },   // towards fishing
-  { x: 0, z: -26 }, { x: 0, z: -35 },       // towards jackpot
+  { x: 6, z: -22 }, { x: 10, z: -27 },     // towards sports
+  { x: 0, z: -26 }, { x: 0, z: -35 },      // towards jackpot
 ];
 for (const p of uplightPositions) {
   const uplight = new THREE.PointLight(0xffd700, 2, 12);
@@ -1121,6 +1136,145 @@ function createFishingHarbor() {
 }
 
 // ============================================================
+// BUILDING: SPORTS ARENA (Green/Orange Stadium)
+// ============================================================
+function createSportsArena() {
+  const group = new THREE.Group();
+  const C = COLORS.sports;
+
+  // Stadium base (oval platform)
+  const base = new THREE.Mesh(
+    new THREE.CylinderGeometry(6, 6.5, 1.0, 32),
+    new THREE.MeshStandardMaterial({
+      color: 0x1a3a2a, metalness: 0.5, roughness: 0.4,
+      emissive: 0x0a2a1a, emissiveIntensity: 0.25,
+    })
+  );
+  base.position.y = 0.5;
+  base.castShadow = true;
+  group.add(base);
+
+  // Stadium walls (curved stands)
+  const wallGeo = new THREE.CylinderGeometry(6, 6, 5, 32, 1, true);
+  const wall = new THREE.Mesh(wallGeo, makeWallMat(C.ambient));
+  wall.position.y = 3.5;
+  group.add(wall);
+
+  // Top rim neon
+  const topRim = new THREE.Mesh(
+    new THREE.TorusGeometry(6.05, 0.1, 8, 64),
+    makeEmissiveMat(C.primary, 3)
+  );
+  topRim.rotation.x = -Math.PI / 2;
+  topRim.position.y = 6;
+  group.add(topRim);
+
+  // Mid rim neon
+  const midRim = new THREE.Mesh(
+    new THREE.TorusGeometry(6.05, 0.08, 8, 64),
+    makeEmissiveMat(C.secondary, 2.5)
+  );
+  midRim.rotation.x = -Math.PI / 2;
+  midRim.position.y = 3.5;
+  group.add(midRim);
+
+  // Green pitch field inside
+  const pitch = new THREE.Mesh(
+    new THREE.CircleGeometry(5, 32),
+    new THREE.MeshStandardMaterial({
+      color: 0x2a8a3a, emissive: 0x1a5a2a,
+      emissiveIntensity: 0.4, metalness: 0.1, roughness: 0.9,
+    })
+  );
+  pitch.rotation.x = -Math.PI / 2;
+  pitch.position.y = 1.05;
+  group.add(pitch);
+
+  // Center circle on pitch
+  const centerCircle = new THREE.Mesh(
+    new THREE.RingGeometry(1.2, 1.35, 32),
+    new THREE.MeshStandardMaterial({
+      color: 0xffffff, emissive: 0xffffff,
+      emissiveIntensity: 0.8, toneMapped: false,
+      transparent: true, opacity: 0.5,
+    })
+  );
+  centerCircle.rotation.x = -Math.PI / 2;
+  centerCircle.position.y = 1.06;
+  group.add(centerCircle);
+
+  // Floodlight towers (4 corners)
+  const towerAngles = [0, Math.PI / 2, Math.PI, Math.PI * 1.5];
+  for (const angle of towerAngles) {
+    const tx = Math.cos(angle) * 5.5;
+    const tz = Math.sin(angle) * 5.5;
+
+    const pole = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.12, 0.15, 4, 6),
+      new THREE.MeshStandardMaterial({ color: 0x555555, metalness: 0.7, roughness: 0.3 })
+    );
+    pole.position.set(tx, 8, tz);
+    group.add(pole);
+
+    const floodlight = new THREE.Mesh(
+      new THREE.BoxGeometry(0.8, 0.4, 0.4),
+      makeEmissiveMat(0xffffff, 3)
+    );
+    floodlight.position.set(tx, 10.1, tz);
+    floodlight.lookAt(0, 1, 0);
+    group.add(floodlight);
+  }
+
+  // Scoreboard
+  const scoreboard = new THREE.Mesh(
+    new THREE.BoxGeometry(3, 1.5, 0.2),
+    new THREE.MeshStandardMaterial({
+      color: 0x111111, emissive: C.secondary,
+      emissiveIntensity: 0.8, metalness: 0.3, roughness: 0.5,
+    })
+  );
+  scoreboard.position.set(0, 7.5, 6.2);
+  group.add(scoreboard);
+
+  // Scoreboard frame
+  addNeonEdge(group,
+    new THREE.BoxGeometry(3.2, 0.08, 0.08),
+    C.primary, { y: 8.3, z: 6.2 }
+  );
+  addNeonEdge(group,
+    new THREE.BoxGeometry(3.2, 0.08, 0.08),
+    C.primary, { y: 6.7, z: 6.2 }
+  );
+
+  // Point lights
+  const greenLight = new THREE.PointLight(C.primary, 8, 28);
+  greenLight.position.set(0, 10, 0);
+  group.add(greenLight);
+
+  const orangeLight = new THREE.PointLight(C.secondary, 4, 18);
+  orangeLight.position.set(0, 4, 6);
+  group.add(orangeLight);
+
+  // Ground glow
+  const glowDisc = new THREE.Mesh(
+    new THREE.CircleGeometry(12, 32),
+    new THREE.MeshStandardMaterial({
+      color: C.primary, emissive: C.primary,
+      emissiveIntensity: 0.8, toneMapped: false,
+      transparent: true, opacity: 0.25,
+    })
+  );
+  glowDisc.rotation.x = -Math.PI / 2;
+  glowDisc.position.y = 0.01;
+  group.add(glowDisc);
+
+  const bp = BUILDING_POS.sports;
+  group.position.set(bp.x, bp.y, bp.z);
+  group.userData = { id: 'sports', labelY: 12 };
+  return group;
+}
+
+// ============================================================
 // BUILDING: JACKPOT TEMPLE (Gold/White Grand Temple)
 // ============================================================
 function createJackpotTemple() {
@@ -1261,6 +1415,7 @@ function initBuildings() {
     slots: createSlotHall,
     live: createLiveStage,
     fishing: createFishingHarbor,
+    sports: createSportsArena,
     jackpot: createJackpotTemple,
   };
   for (const [id, factory] of Object.entries(factories)) {
@@ -1289,6 +1444,7 @@ function createLabel(id, building) {
     slots: { name: 'SLOT HALL', sub: '14,392 Playing', color: '#a855f7' },
     live: { name: 'LIVE STAGE', sub: '5,218 At Tables', color: '#ff2d55' },
     fishing: { name: 'FISHING HARBOR', sub: '3,847 Fishing', color: '#00d4ff' },
+    sports: { name: 'SPORTS ARENA', sub: '8,531 Betting', color: '#22cc55' },
     jackpot: { name: 'JACKPOT TEMPLE', sub: '$4.2M Prize Pool', color: '#ffd700' },
   };
   const data = info[id];
